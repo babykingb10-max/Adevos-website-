@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adevos-X Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg-body:#0a0f0a; --bg-panel:#0e1410; --bg-card:#121a14; --border:#1c2a1f;
+    --text-primary:#e2f0e0; --text-secondary:#9bbf8f; --accent:#00e676; --danger:#ff5555;
+  }
+  body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg-body); color:var(--text-primary); min-height:100vh; }
+  h1,h2,h3,.brand { font-family:'Orbitron',sans-serif; }
+  a { color:inherit; }
+
+  /* ===== LOGIN SCREEN ===== */
+  #loginScreen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem; }
+  .login-box { background:var(--bg-panel); border:1px solid var(--accent); border-radius:1rem; padding:2rem 1.6rem; max-width:380px; width:100%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.6); }
+  .login-box h1 { font-size:1.3rem; background:linear-gradient(135deg,var(--accent),#b9f6ca); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:0.3rem; }
+  .login-box p { font-size:0.78rem; color:var(--text-secondary); margin-bottom:1.4rem; }
+  .field { margin-bottom:0.8rem; text-align:left; }
+  .field label { font-size:0.68rem; text-transform:uppercase; color:var(--text-secondary); font-weight:700; display:block; margin-bottom:0.3rem; }
+  .field input, .field select, .field textarea { width:100%; background:var(--bg-card); border:1px solid var(--border); border-radius:0.5rem; padding:0.55rem 0.7rem; color:var(--text-primary); font-size:0.85rem; outline:none; font-family:inherit; }
+  .field textarea { resize:vertical; min-height:70px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:0.4rem; background:var(--accent); color:#0a0f0a; border:none; border-radius:0.5rem; padding:0.6rem 1.1rem; font-weight:700; font-size:0.8rem; cursor:pointer; transition:0.2s; }
+  .btn:hover { background:#b9f6ca; }
+  .btn.secondary { background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border); }
+  .btn.danger { background:rgba(255,85,85,0.12); color:var(--danger); border:1px solid rgba(255,85,85,0.4); }
+  .btn.block { width:100%; margin-top:0.4rem; }
+  .divider { display:flex; align-items:center; gap:0.6rem; margin:1rem 0; font-size:0.68rem; color:var(--text-secondary); }
+  .divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  .oauth-row { display:flex; flex-direction:column; gap:0.5rem; }
+  .oauth-btn { display:flex; align-items:center; justify-content:center; gap:0.6rem; background:var(--bg-card); border:1px solid var(--border); border-radius:2rem; padding:0.55rem; font-weight:600; font-size:0.8rem; text-decoration:none; color:var(--text-primary); }
+  .oauth-btn i.google { color:#ea4335; } .oauth-btn i.github { color:#f5f5f5; }
+
+  /* ===== APP SHELL ===== */
+  #app { display:none; min-height:100vh; grid-template-columns:230px 1fr; }
+  #app.show { display:grid; }
+  .sidebar { background:var(--bg-panel); border-right:1px solid var(--border); padding:1.2rem 0.8rem; height:100vh; position:sticky; top:0; overflow-y:auto; }
+  .sidebar .brand { font-size:1rem; background:linear-gradient(135deg,var(--accent),#b9f6ca); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:1.4rem; padding:0 0.4rem; }
+  .nav-link { display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0.6rem; border-radius:0.5rem; font-size:0.8rem; cursor:pointer; color:var(--text-secondary); margin-bottom:0.15rem; }
+  .nav-link i { width:1.1rem; text-align:center; color:var(--accent); }
+  .nav-link:hover { background:rgba(0,230,118,0.06); color:var(--text-primary); }
+  .nav-link.active { background:rgba(0,230,118,0.12); color:var(--accent); font-weight:700; }
+  .nav-section-label { font-size:0.62rem; text-transform:uppercase; color:var(--text-secondary); opacity:0.6; margin:0.9rem 0 0.3rem 0.6rem; letter-spacing:1px; }
+
+  .main { padding:1.4rem 1.6rem 3rem; overflow-x:hidden; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.3rem; flex-wrap:wrap; gap:0.6rem; }
+  .topbar h2 { font-size:1.05rem; }
+  .topbar-actions { display:flex; gap:0.5rem; align-items:center; }
+
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:0.8rem; margin-bottom:1.4rem; }
+  .stat-card { background:var(--bg-card); border:1px solid var(--border); border-radius:0.8rem; padding:1rem; }
+  .stat-card .num { font-size:1.6rem; font-weight:900; color:var(--accent); font-family:'Orbitron',sans-serif; }
+  .stat-card .label { font-size:0.7rem; color:var(--text-secondary); margin-top:0.2rem; }
+
+  table { width:100%; border-collapse:collapse; background:var(--bg-card); border:1px solid var(--border); border-radius:0.6rem; overflow:hidden; font-size:0.78rem; }
+  th, td { padding:0.6rem 0.7rem; text-align:left; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { background:rgba(0,230,118,0.06); color:var(--accent); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.4px; }
+  tr:last-child td { border-bottom:none; }
+  td img { width:44px; height:32px; object-fit:cover; border-radius:0.3rem; }
+  .row-actions { display:flex; gap:0.35rem; flex-wrap:wrap; }
+  .mini-btn { border:1px solid var(--border); background:var(--bg-panel); color:var(--text-secondary); border-radius:0.35rem; padding:0.25rem 0.5rem; font-size:0.68rem; cursor:pointer; }
+  .mini-btn:hover { color:var(--accent); border-color:var(--accent); }
+  .mini-btn.danger:hover { color:var(--danger); border-color:var(--danger); }
+  .badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:1rem; font-size:0.65rem; font-weight:700; }
+  .badge.green { background:rgba(0,230,118,0.12); color:var(--accent); }
+  .badge.red { background:rgba(255,85,85,0.12); color:var(--danger); }
+  .badge.gray { background:rgba(155,191,143,0.12); color:var(--text-secondary); }
+
+  .panel { background:var(--bg-card); border:1px solid var(--border); border-radius:0.8rem; padding:1.1rem; margin-bottom:1.2rem; }
+  .panel h3 { font-size:0.85rem; color:var(--accent); margin-bottom:0.8rem; }
+  .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0.7rem; }
+  .table-wrap { overflow-x:auto; }
+  .empty-state { text-align:center; padding:2rem; color:var(--text-secondary); font-size:0.8rem; }
+  .toast-container { position:fixed; top:14px; right:14px; z-index:5000; display:flex; flex-direction:column; gap:0.5rem; }
+  .toast { background:var(--bg-panel); border:1px solid var(--accent); border-radius:0.5rem; padding:0.55rem 0.9rem; font-size:0.75rem; box-shadow:0 6px 20px rgba(0,0,0,0.5); }
+  .toast.error { border-color:var(--danger); color:var(--danger); }
+
+  @media (max-width:800px) {
+    #app.show { grid-template-columns:1fr; }
+    .sidebar { position:fixed; left:-260px; width:230px; z-index:2000; transition:0.25s; box-shadow:0 0 30px rgba(0,0,0,0.6); }
+    .sidebar.open { left:0; }
+    .mobile-menu-btn { display:inline-flex; }
+  }
+  .mobile-menu-btn { display:none; background:var(--bg-card); border:1px solid var(--border); color:var(--accent); border-radius:0.4rem; padding:0.4rem 0.6rem; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1><i class="fas fa-shield-alt"></i> Adevos-X Admin</h1>
+    <p>Sign in to manage the platform</p>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="adminUsername" placeholder="admin">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="adminPassword" placeholder="••••••••">
+    </div>
+    <button class="btn block" onclick="loginWithCredentials()"><i class="fas fa-sign-in-alt"></i> Login</button>
+
+    <div class="divider">OR</div>
+    <div class="oauth-row">
+      <a class="oauth-btn" href="/auth/google?admin=true"><i class="fab fa-google google"></i> Continue with Google</a>
+      <a class="oauth-btn" href="/auth/github?admin=true"><i class="fab fa-github github"></i> Continue with GitHub</a>
+    </div>
+    <p style="font-size:0.65rem;color:var(--text-secondary);margin-top:1rem;">Google/GitHub login requires your account to have the <strong>admin</strong> role assigned in the database.</p>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">ADEVOS-X ADMIN</div>
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-link" data-view="dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
+
+    <div class="nav-section-label">Content</div>
+    <div class="nav-link" data-view="slides"><i class="fas fa-images"></i> Slides</div>
+    <div class="nav-link" data-view="services"><i class="fas fa-concierge-bell"></i> Services</div>
+    <div class="nav-link" data-view="touch-cards"><i class="fas fa-th-large"></i> Touch Cards</div>
+    <div class="nav-link" data-view="testimonials"><i class="fas fa-quote-right"></i> Testimonials</div>
+    <div class="nav-link" data-view="updates"><i class="fas fa-bell"></i> Updates</div>
+    <div class="nav-link" data-view="sidebar-items"><i class="fas fa-bars"></i> Sidebar Menu</div>
+
+    <div class="nav-section-label">Bot Platform</div>
+    <div class="nav-link" data-view="bots"><i class="fas fa-robot"></i> Bot Catalog</div>
+    <div class="nav-link" data-view="platforms"><i class="fas fa-server"></i> Deploy Platforms</div>
+    <div class="nav-link" data-view="deployments"><i class="fas fa-rocket"></i> Deployments</div>
+    <div class="nav-link" data-view="music"><i class="fas fa-music"></i> Music Player</div>
+
+    <div class="nav-section-label">Accounts & Money</div>
+    <div class="nav-link" data-view="users"><i class="fas fa-users"></i> Users</div>
+    <div class="nav-link" data-view="payments"><i class="fas fa-money-bill-wave"></i> Payments</div>
+    <div class="nav-link" data-view="currencies"><i class="fas fa-coins"></i> Currencies</div>
+
+    <div class="nav-section-label">System</div>
+    <div class="nav-link" data-view="translations"><i class="fas fa-language"></i> Translations</div>
+    <div class="nav-link" data-view="settings"><i class="fas fa-sliders-h"></i> Settings</div>
+    <div class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fas fa-bars"></i></button>
+        <h2 id="viewTitle">Dashboard</h2>
+      </div>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+    <div id="viewContent"></div>
+  </main>
+</div>
+
+<script>
+  const API_BASE = window.location.origin;
+  function getToken(){ return localStorage.getItem('adminJwt') || ''; }
+  function setToken(t){ localStorage.setItem('adminJwt', t); }
+  function clearToken(){ localStorage.removeItem('adminJwt'); }
+
+  async function apiFetch(path, opts = {}) {
+    const headers = Object.assign({ 'Content-Type':'application/json' }, opts.headers || {});
+    const token = getToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}${path}`, Object.assign({}, opts, { headers }));
+    let data = null;
+    try { data = await res.json(); } catch(e) {}
+    if (!res.ok) throw new Error((data && data.message) || `Request failed (${res.status})`);
+    return data;
+  }
+  function showToast(msg, type='success') {
+    const c = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast' + (type==='error' ? ' error' : '');
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(()=>el.remove(), 3500);
+  }
+
+  // ---------- LOGIN ----------
+  async function loginWithCredentials() {
+    const username = document.getElementById('adminUsername').value.trim();
+    const password = document.getElementById('adminPassword').value.trim();
+    if (!username || !password) return showToast('Enter username and password', 'error');
+    try {
+      const res = await apiFetch('/auth/admin/login', { method:'POST', body: JSON.stringify({ username, password }) });
+      setToken(res.token);
+      boot();
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  function logout() { clearToken(); location.reload(); }
+
+  // ---------- GENERIC CRUD VIEW CONFIG ----------
+  // Each entry describes: API path, table columns, and form fields for create/edit.
+  const VIEWS = {
+    slides: {
+      title: 'Slides', api: '/api/admin/slides',
+      columns: [ {k:'image',label:'Image',img:true}, {k:'title',label:'Title'}, {k:'layout',label:'Layout'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'title',label:'Title',type:'text',required:true},
+        {k:'image',label:'Image URL (upload below or paste Cloudinary URL)',type:'text',required:true},
+        {k:'ctaText',label:'Button Text',type:'text'},
+        {k:'ctaAction',label:'Button Action (support/tutorials/coins/deployer/URL)',type:'text'},
+        {k:'layout',label:'Layout',type:'select',options:['top','bottom','left','right']},
+        {k:'order',label:'Order',type:'number'},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ],
+      imageUpload: true
+    },
+    services: {
+      title: 'Services', api: '/api/admin/services',
+      columns: [ {k:'icon',label:'Icon'}, {k:'title',label:'Title'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'icon',label:'FontAwesome icon class (e.g. fas fa-code)',type:'text',required:true},
+        {k:'title',label:'Title',type:'text',required:true},
+        {k:'description',label:'Description',type:'textarea',required:true},
+        {k:'order',label:'Order',type:'number'},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ]
+    },
+    'touch-cards': {
+      title: 'Touch Cards ("Get in touch" section)', api: '/api/admin/touch-cards',
+      columns: [ {k:'image',label:'Image',img:true}, {k:'title',label:'Title'}, {k:'cardType',label:'Type'}, {k:'layout',label:'Layout'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'title',label:'Title',type:'text',required:true},
+        {k:'description',label:'Description',type:'textarea'},
+        {k:'image',label:'Image URL',type:'text',required:true},
+        {k:'layout',label:'Layout',type:'select',options:['top','bottom','left','right']},
+        {k:'cardType',label:'Card Type',type:'select',options:['deploy','deployer','manage','tutorial','feedback','support','developer','updates','generic']},
+        {k:'buttonText',label:'Button Text',type:'text'},
+        {k:'buttonAction',label:'Button Action / URL',type:'text'},
+        {k:'order',label:'Order',type:'number'},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ],
+      imageUpload: true
+    },
+    testimonials: {
+      title: 'Client Testimonials', api: '/api/admin/testimonials',
+      columns: [ {k:'text',label:'Text'}, {k:'author',label:'Author'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'text',label:'Testimonial Text',type:'textarea',required:true},
+        {k:'author',label:'Author',type:'text',required:true},
+        {k:'order',label:'Order',type:'number'},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ]
+    },
+    updates: {
+      title: 'System Updates Feed', api: '/api/admin/updates',
+      columns: [ {k:'text',label:'Text'}, {k:'createdAt',label:'Posted',date:true}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [ {k:'text',label:'Update Text',type:'textarea',required:true}, {k:'isActive',label:'Active',type:'checkbox'} ]
+    },
+    'sidebar-items': {
+      title: 'Sidebar (Hamburger) Menu', api: '/api/admin/sidebar',
+      columns: [ {k:'icon',label:'Icon'}, {k:'label',label:'Label'}, {k:'group',label:'Group'}, {k:'actionType',label:'Type'}, {k:'order',label:'Order'} ],
+      fields: [
+        {k:'label',label:'Label',type:'text',required:true},
+        {k:'icon',label:'FontAwesome icon class',type:'text',required:true},
+        {k:'group',label:'Group (e.g. Home, Bot Platform, Support)',type:'text',required:true},
+        {k:'actionType',label:'Action Type',type:'select',options:['internal','external']},
+        {k:'action',label:'Internal action key (e.g. openDeployModal)',type:'text'},
+        {k:'url',label:'External URL',type:'text'},
+        {k:'order',label:'Order',type:'number'},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ]
+    },
+    bots: {
+      title: 'Bot Catalog (Deployer Bots)', api: '/api/admin/bots',
+      columns: [ {k:'image',label:'Image',img:true}, {k:'name',label:'Name'}, {k:'author',label:'Author'}, {k:'addedDate',label:'Added',date:true}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'name',label:'Bot Name (shown bold)',type:'text',required:true},
+        {k:'description',label:'Description',type:'textarea',required:true},
+        {k:'image',label:'Image URL',type:'text',required:true},
+        {k:'author',label:'Author',type:'text'},
+        {k:'githubRepo',label:'GitHub Repo URL',type:'text',required:true},
+        {k:'pairSite',label:'Pair Site URL (unique per bot)',type:'text',required:true},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ],
+      imageUpload: true
+    },
+    platforms: {
+      title: 'Deployment Platforms', api: '/api/admin/platforms',
+      columns: [ {k:'name',label:'Name'}, {k:'slug',label:'Slug'}, {k:'envKey',label:'.env key'}, {k:'moduleName',label:'Module'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'name',label:'Platform Name (e.g. Heroku)',type:'text',required:true},
+        {k:'slug',label:'Slug (e.g. heroku)',type:'text',required:true},
+        {k:'envKey',label:'.env variable name (e.g. HEROKU_API_KEY)',type:'text',required:true},
+        {k:'moduleName',label:'Deploy module (deployHeroku or deployPanel)',type:'select',options:['deployHeroku','deployPanel']},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ]
+    },
+    currencies: {
+      title: 'Currencies', api: '/api/admin/currencies',
+      columns: [ {k:'code',label:'Code'}, {k:'symbol',label:'Symbol'}, {k:'exchangeRate',label:'Rate (per USD)'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'code',label:'Currency Code (e.g. TZS)',type:'text',required:true},
+        {k:'symbol',label:'Symbol (e.g. TSh)',type:'text',required:true},
+        {k:'exchangeRate',label:'Exchange Rate (per 1 USD)',type:'number',required:true},
+        {k:'countryCodes',label:'Country Codes (comma separated, e.g. TZ,KE)',type:'text',isArray:true},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ]
+    }
+  };
+
+  let currentView = 'dashboard';
+  let editingId = null;
+
+  function switchView(view) {
+    currentView = view; editingId = null;
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+    document.getElementById('sidebar').classList.remove('open');
+    if (view === 'dashboard') return renderDashboard();
+    if (view === 'users') return renderUsers();
+    if (view === 'payments') return renderPayments();
+    if (view === 'deployments') return renderDeployments();
+    if (view === 'music') return renderMusic();
+    if (view === 'translations') return renderTranslations();
+    if (view === 'settings') return renderSettings();
+    return renderCrudView(view);
+  }
+
+  document.querySelectorAll('.nav-link[data-view]').forEach(el => el.addEventListener('click', () => switchView(el.dataset.view)));
+
+  // ---------- DASHBOARD ----------
+  async function renderDashboard() {
+    document.getElementById('viewTitle').textContent = 'Dashboard';
+    document.getElementById('topbarActions').innerHTML = '';
+    try {
+      const res = await apiFetch('/api/admin/dashboard');
+      const d = res.data;
+      document.getElementById('viewContent').innerHTML = `
+        <div class="stats-row">
+          <div class="stat-card"><div class="num">${d.userCount}</div><div class="label">Total Users</div></div>
+          <div class="stat-card"><div class="num">${d.botCount}</div><div class="label">Active Bots in Catalog</div></div>
+          <div class="stat-card"><div class="num">${d.activeDeployments}</div><div class="label">Active Deployments</div></div>
+          <div class="stat-card"><div class="num">${d.pendingPayments}</div><div class="label">Pending Payments</div></div>
+        </div>
+        <div class="panel">
+          <h3><i class="fas fa-info-circle"></i> Quick Guide</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.7;">
+            Use the sidebar to manage every part of the public website: Slides, Services, Touch Cards and Testimonials control the homepage;
+            Bot Catalog and Deploy Platforms control what customers can deploy; Payments lets you approve manual M-Pesa/Tigo Pesa receipts;
+            Settings controls pricing, discounts, and assistant replies.
+          </p>
+        </div>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- GENERIC CRUD VIEW ----------
+  async function renderCrudView(view) {
+    const cfg = VIEWS[view];
+    document.getElementById('viewTitle').textContent = cfg.title;
+    document.getElementById('topbarActions').innerHTML = `<button class="btn" onclick="openCrudForm('${view}')"><i class="fas fa-plus"></i> Add New</button>`;
+    const content = document.getElementById('viewContent');
+    content.innerHTML = `<div id="crudFormWrap"></div><div class="table-wrap" id="crudTableWrap">Loading...</div>`;
+    try {
+      const res = await apiFetch(cfg.api);
+      renderCrudTable(view, res.data || []);
+    } catch(err) { showToast(err.message, 'error'); document.getElementById('crudTableWrap').innerHTML = `<div class="empty-state">Failed to load: ${err.message}</div>`; }
+  }
+
+  function renderCrudTable(view, items) {
+    const cfg = VIEWS[view];
+    const wrap = document.getElementById('crudTableWrap');
+    if (!items.length) { wrap.innerHTML = `<div class="empty-state"><i class="fas fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:0.5rem;"></i>No records yet. Click "Add New" to create one.</div>`; return; }
+    wrap.innerHTML = `<table><thead><tr>${cfg.columns.map(c=>`<th>${c.label}</th>`).join('')}<th>Actions</th></tr></thead><tbody>
+      ${items.map(item => `<tr>${cfg.columns.map(c => `<td>${renderCell(item, c)}</td>`).join('')}
+        <td class="row-actions">
+          <button class="mini-btn" onclick='openCrudForm("${view}", ${JSON.stringify(item._id)})'><i class="fas fa-edit"></i> Edit</button>
+          <button class="mini-btn danger" onclick='deleteCrudItem("${view}", "${item._id}")'><i class="fas fa-trash"></i> Delete</button>
+        </td></tr>`).join('')}
+      </tbody></table>`;
+    window[`__data_${view}`] = items;
+  }
+  function renderCell(item, col) {
+    const val = item[col.k];
+    if (col.img) return val ? `<img src="${val}">` : '—';
+    if (col.bool) return val ? `<span class="badge green">Active</span>` : `<span class="badge red">Inactive</span>`;
+    if (col.date) return val ? new Date(val).toLocaleDateString() : '—';
+    if (val === undefined || val === null || val === '') return '—';
+    if (typeof val === 'string' && val.length > 60) return val.slice(0,60) + '…';
+    return val;
+  }
+
+  function openCrudForm(view, id) {
+    const cfg = VIEWS[view];
+    editingId = id || null;
+    const items = window[`__data_${view}`] || [];
+    const existing = id ? items.find(i => i._id === id) : null;
+
+    const fieldsHtml = cfg.fields.map(f => {
+      const value = existing ? existing[f.k] : (f.type === 'checkbox' ? true : (f.type==='number' ? 0 : ''));
+      if (f.type === 'select') {
+        return `<div class="field"><label>${f.label}</label><select id="f_${f.k}">${f.options.map(o=>`<option value="${o}" ${value===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
+      }
+      if (f.type === 'checkbox') {
+        return `<div class="field"><label>${f.label}</label><select id="f_${f.k}"><option value="true" ${value!==false?'selected':''}>Yes</option><option value="false" ${value===false?'selected':''}>No</option></select></div>`;
+      }
+      if (f.type === 'textarea') {
+        return `<div class="field" style="grid-column:1/-1;"><label>${f.label}</label><textarea id="f_${f.k}">${value||''}</textarea></div>`;
+      }
+      const arrayVal = f.isArray && Array.isArray(value) ? value.join(',') : (value || '');
+      return `<div class="field"><label>${f.label}</label><input type="${f.type}" id="f_${f.k}" value="${String(arrayVal).replace(/"/g,'&quot;')}"></div>`;
+    }).join('');
+
+    const uploadHtml = cfg.imageUpload ? `
+      <div class="field" style="grid-column:1/-1;">
+        <label>Or upload an image (goes to Cloudinary automatically)</label>
+        <input type="file" id="f_imageUpload" accept="image/*">
+        <div id="uploadStatus" style="font-size:0.68rem;color:var(--text-secondary);margin-top:0.3rem;"></div>
+      </div>` : '';
+
+    document.getElementById('crudFormWrap').innerHTML = `
+      <div class="panel">
+        <h3>${existing ? 'Edit' : 'Add New'} — ${cfg.title}</h3>
+        <div class="form-grid">${fieldsHtml}${uploadHtml}</div>
+        <div style="margin-top:1rem;display:flex;gap:0.6rem;">
+          <button class="btn" onclick="submitCrudForm('${view}')"><i class="fas fa-save"></i> Save</button>
+          <button class="btn secondary" onclick="document.getElementById('crudFormWrap').innerHTML=''">Cancel</button>
+        </div>
+      </div>`;
+
+    if (cfg.imageUpload) {
+      document.getElementById('f_imageUpload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const statusEl = document.getElementById('uploadStatus');
+        statusEl.textContent = 'Uploading...';
+        try {
+          const formData = new FormData();
+          formData.append('image', file);
+          const res = await fetch(`${API_BASE}/api/admin/upload`, { method:'POST', headers:{ Authorization:`Bearer ${getToken()}` }, body: formData });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'Upload failed');
+          document.getElementById('f_image').value = data.url;
+          statusEl.textContent = 'Uploaded ✓';
+        } catch(err) { statusEl.textContent = 'Upload failed: ' + err.message; }
+      });
+    }
+
+    document.getElementById('crudFormWrap').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  async function submitCrudForm(view) {
+    const cfg = VIEWS[view];
+    const payload = {};
+    cfg.fields.forEach(f => {
+      const el = document.getElementById(`f_${f.k}`);
+      if (!el) return;
+      if (f.type === 'checkbox') payload[f.k] = el.value === 'true';
+      else if (f.type === 'number') payload[f.k] = Number(el.value);
+      else if (f.isArray) payload[f.k] = el.value.split(',').map(s=>s.trim()).filter(Boolean);
+      else payload[f.k] = el.value;
+    });
+    try {
+      if (editingId) await apiFetch(`${cfg.api}/${editingId}`, { method:'PUT', body: JSON.stringify(payload) });
+      else await apiFetch(cfg.api, { method:'POST', body: JSON.stringify(payload) });
+      showToast('Saved successfully');
+      document.getElementById('crudFormWrap').innerHTML = '';
+      renderCrudView(view);
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+
+  async function deleteCrudItem(view, id) {
+    if (!confirm('Delete this record? This cannot be undone.')) return;
+    const cfg = VIEWS[view];
+    try { await apiFetch(`${cfg.api}/${id}`, { method:'DELETE' }); showToast('Deleted'); renderCrudView(view); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- USERS ----------
+  async function renderUsers() {
+    document.getElementById('viewTitle').textContent = 'Users';
+    document.getElementById('topbarActions').innerHTML = '';
+    const content = document.getElementById('viewContent');
+    content.innerHTML = 'Loading...';
+    try {
+      const res = await apiFetch('/api/admin/users');
+      const users = res.data || [];
+      content.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Provider</th><th>Coins</th><th>Deployer</th><th>Expiry</th><th>Role</th><th>Actions</th></tr></thead><tbody>
+        ${users.map(u => `<tr>
+          <td>${u.name}</td><td>${u.email}</td><td>${u.provider}</td>
+          <td>${u.coins}</td>
+          <td>${u.isDeployer ? '<span class="badge green">Yes</span>' : '<span class="badge gray">No</span>'}</td>
+          <td>${u.deployerExpiry ? new Date(u.deployerExpiry).toLocaleDateString() : '—'}</td>
+          <td>${u.role}</td>
+          <td class="row-actions">
+            <button class="mini-btn" onclick='promoteAdmin("${u._id}", "${u.role}")'>${u.role==='admin'?'Revoke Admin':'Make Admin'}</button>
+            <button class="mini-btn" onclick='adjustCoins("${u._id}")'>Adjust Coins</button>
+            <button class="mini-btn danger" onclick='deleteUser("${u._id}")'>Delete</button>
+          </td></tr>`).join('')}
+        </tbody></table></div>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  async function promoteAdmin(id, currentRole) {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    try { await apiFetch(`/api/admin/users/${id}`, { method:'PUT', body: JSON.stringify({ role: newRole }) }); showToast('Role updated'); renderUsers(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+  async function adjustCoins(id) {
+    const val = prompt('New AV Coins balance:');
+    if (val === null) return;
+    try { await apiFetch(`/api/admin/users/${id}`, { method:'PUT', body: JSON.stringify({ coins: Number(val) }) }); showToast('Coins updated'); renderUsers(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+  async function deleteUser(id) {
+    if (!confirm('Delete this user permanently?')) return;
+    try { await apiFetch(`/api/admin/users/${id}`, { method:'DELETE' }); showToast('User deleted'); renderUsers(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- PAYMENTS ----------
+  async function renderPayments() {
+    document.getElementById('viewTitle').textContent = 'Payments';
+    document.getElementById('topbarActions').innerHTML = '';
+    const content = document.getElementById('viewContent');
+    content.innerHTML = 'Loading...';
+    try {
+      const res = await apiFetch('/api/admin/payments');
+      const txs = res.data || [];
+      content.innerHTML = `<div class="table-wrap"><table><thead><tr><th>User</th><th>Method</th><th>Purpose</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>
+        ${txs.map(t => `<tr>
+          <td>${t.user ? t.user.name + '<br><span style="color:var(--text-secondary);font-size:0.68rem;">' + t.user.email + '</span>' : '—'}</td>
+          <td>${t.method}</td><td>${t.purpose.replace(/_/g,' ')}</td><td>$${t.amount}</td>
+          <td>${t.status === 'completed' ? '<span class="badge green">Completed</span>' : t.status === 'pending' ? '<span class="badge gray">Pending</span>' : '<span class="badge red">Failed</span>'}</td>
+          <td>${new Date(t.createdAt).toLocaleString()}</td>
+          <td class="row-actions">
+            ${t.status === 'pending' && t.method === 'manual' ? `<button class="mini-btn" onclick='approvePayment("${t._id}")'><i class="fas fa-check"></i> Verify & Approve</button><button class="mini-btn danger" onclick='rejectPayment("${t._id}")'>Reject</button>` : ''}
+          </td></tr>`).join('')}
+        </tbody></table></div>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  async function approvePayment(id) {
+    try { await apiFetch(`/api/admin/payments/${id}/approve`, { method:'POST' }); showToast('Payment approved and account updated'); renderPayments(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+  async function rejectPayment(id) {
+    try { await apiFetch(`/api/admin/payments/${id}/reject`, { method:'POST' }); showToast('Payment rejected'); renderPayments(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- DEPLOYMENTS ----------
+  async function renderDeployments() {
+    document.getElementById('viewTitle').textContent = 'Deployments';
+    document.getElementById('topbarActions').innerHTML = '';
+    const content = document.getElementById('viewContent');
+    content.innerHTML = 'Loading...';
+    try {
+      const res = await apiFetch('/api/admin/deployments');
+      const deployments = res.data || [];
+      content.innerHTML = `<div class="table-wrap"><table><thead><tr><th>User</th><th>Bot</th><th>Owner</th><th>Platform</th><th>Status</th><th>Created</th></tr></thead><tbody>
+        ${deployments.map(d => `<tr>
+          <td>${d.user?.name || '—'}</td><td>${d.bot?.name || '—'}</td>
+          <td>${d.ownerName}<br><span style="color:var(--text-secondary);font-size:0.68rem;">${d.ownerNumber}</span></td>
+          <td>${d.platform?.name || '—'}</td>
+          <td>${d.status === 'online' ? '<span class="badge green">Online</span>' : d.status === 'failed' ? '<span class="badge red">Failed</span>' : `<span class="badge gray">${d.status}</span>`}</td>
+          <td>${new Date(d.createdAt).toLocaleDateString()}</td>
+        </tr>`).join('')}
+        </tbody></table></div>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- MUSIC ----------
+  async function renderMusic() {
+    document.getElementById('viewTitle').textContent = 'Deployment Music Player';
+    document.getElementById('topbarActions').innerHTML = '';
+    const content = document.getElementById('viewContent');
+    try {
+      const res = await apiFetch('/api/admin/music');
+      const music = res.data;
+      content.innerHTML = `
+        <div class="panel">
+          <h3>Tracks (one per line: <code>Name | URL</code>)</h3>
+          <textarea id="musicTracks" style="width:100%;min-height:140px;background:var(--bg-panel);border:1px solid var(--border);border-radius:0.5rem;padding:0.6rem;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${(music.tracks||[]).map(t=>`${t.name} | ${t.url}`).join('\\n')}</textarea>
+          <div class="form-grid" style="margin-top:0.8rem;">
+            <div class="field"><label>Autoplay</label><select id="musicAutoplay"><option value="true" ${music.autoplay?'selected':''}>Yes</option><option value="false" ${!music.autoplay?'selected':''}>No</option></select></div>
+            <div class="field"><label>Volume (0-100)</label><input type="number" id="musicVolume" value="${music.volume}" min="0" max="100"></div>
+          </div>
+          <button class="btn" style="margin-top:0.8rem;" onclick="saveMusic()"><i class="fas fa-save"></i> Save</button>
+        </div>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  async function saveMusic() {
+    const lines = document.getElementById('musicTracks').value.split('\n').map(l=>l.trim()).filter(Boolean);
+    const tracks = lines.map(l => { const [name, url] = l.split('|').map(s=>s.trim()); return { name, url }; });
+    const autoplay = document.getElementById('musicAutoplay').value === 'true';
+    const volume = Number(document.getElementById('musicVolume').value);
+    try { await apiFetch('/api/admin/music', { method:'PUT', body: JSON.stringify({ tracks, autoplay, volume }) }); showToast('Music settings saved'); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- TRANSLATIONS ----------
+  async function renderTranslations() {
+    document.getElementById('viewTitle').textContent = 'Translations (i18n)';
+    document.getElementById('topbarActions').innerHTML = `<button class="btn" onclick="openTranslationForm()"><i class="fas fa-plus"></i> Add Key</button>`;
+    const content = document.getElementById('viewContent');
+    content.innerHTML = `<div id="translationFormWrap"></div><div class="table-wrap" id="translationTableWrap">Loading...</div>`;
+    try {
+      const res = await apiFetch('/api/admin/translations');
+      const items = res.data || [];
+      document.getElementById('translationTableWrap').innerHTML = !items.length ? `<div class="empty-state">No translation keys yet.</div>` :
+        `<table><thead><tr><th>Key</th><th>Values</th><th>Actions</th></tr></thead><tbody>
+        ${items.map(t => `<tr><td>${t.key}</td><td>${Object.entries(t.values||{}).map(([lang,val])=>`<strong>${lang}:</strong> ${val}`).join('<br>')}</td>
+        <td class="row-actions"><button class="mini-btn danger" onclick='deleteTranslation("${t._id}")'>Delete</button></td></tr>`).join('')}
+        </tbody></table>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  function openTranslationForm() {
+    document.getElementById('translationFormWrap').innerHTML = `
+      <div class="panel">
+        <h3>Add / Update Translation Key</h3>
+        <div class="form-grid">
+          <div class="field"><label>Key (e.g. btn_deploy)</label><input type="text" id="t_key"></div>
+          <div class="field"><label>English (en)</label><input type="text" id="t_en"></div>
+          <div class="field"><label>Swahili (sw)</label><input type="text" id="t_sw"></div>
+          <div class="field"><label>French (fr)</label><input type="text" id="t_fr"></div>
+        </div>
+        <button class="btn" style="margin-top:0.8rem;" onclick="saveTranslation()"><i class="fas fa-save"></i> Save</button>
+      </div>`;
+  }
+  async function saveTranslation() {
+    const key = document.getElementById('t_key').value.trim();
+    if (!key) return showToast('Key is required', 'error');
+    const values = { en: document.getElementById('t_en').value, sw: document.getElementById('t_sw').value, fr: document.getElementById('t_fr').value };
+    try { await apiFetch('/api/admin/translations', { method:'POST', body: JSON.stringify({ key, values }) }); showToast('Saved'); document.getElementById('translationFormWrap').innerHTML=''; renderTranslations(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+  async function deleteTranslation(id) {
+    if (!confirm('Delete this translation key?')) return;
+    try { await apiFetch(`/api/admin/translations/${id}`, { method:'DELETE' }); showToast('Deleted'); renderTranslations(); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- SETTINGS ----------
+  async function renderSettings() {
+    document.getElementById('viewTitle').textContent = 'Global Settings';
+    document.getElementById('topbarActions').innerHTML = '';
+    const content = document.getElementById('viewContent');
+    try {
+      const res = await apiFetch('/api/admin/settings');
+      const s = res.data;
+      content.innerHTML = `
+        <div class="panel">
+          <h3>Pricing & Discounts</h3>
+          <div class="form-grid">
+            <div class="field"><label>Deployer Monthly Price (USD)</label><input type="number" id="s_deployerPrice" value="${s.deployerMonthlyPriceUSD}"></div>
+            <div class="field"><label>Bot Deployment Price (USD)</label><input type="number" id="s_botPrice" value="${s.botDeploymentPriceUSD}"></div>
+            <div class="field"><label>Coins Required per Deploy</label><input type="number" id="s_coinsRequired" value="${s.coinsRequiredPerDeploy}"></div>
+            <div class="field"><label>Coins per Referral</label><input type="number" id="s_coinsReferral" value="${s.coinsPerReferral}"></div>
+            <div class="field"><label>Early Renewal Discount (%)</label><input type="number" id="s_discount" value="${s.earlyRenewalDiscount}"></div>
+            <div class="field"><label>Early Renewal Window (days)</label><input type="number" id="s_window" value="${s.earlyRenewalWindowDays}"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Platform Links</h3>
+          <div class="form-grid">
+            <div class="field"><label>WhatsApp Community</label><input type="text" id="s_waCommunity" value="${s.platformLinks?.whatsappCommunity||''}"></div>
+            <div class="field"><label>WhatsApp Channel</label><input type="text" id="s_waChannel" value="${s.platformLinks?.whatsappChannel||''}"></div>
+            <div class="field"><label>Telegram Channel</label><input type="text" id="s_tgChannel" value="${s.platformLinks?.telegramChannel||''}"></div>
+            <div class="field"><label>WhatsApp Support Number</label><input type="text" id="s_waSupport" value="${s.platformLinks?.whatsappSupportNumber||''}"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Assistant Reply Overrides (one per line: <code>keyword | reply text</code>)</h3>
+          <textarea id="s_assistantReplies" style="width:100%;min-height:120px;background:var(--bg-panel);border:1px solid var(--border);border-radius:0.5rem;padding:0.6rem;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${Object.entries(s.assistantReplies||{}).map(([k,v])=>`${k} | ${v}`).join('\\n')}</textarea>
+        </div>
+        <button class="btn" onclick="saveSettings()"><i class="fas fa-save"></i> Save All Settings</button>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  async function saveSettings() {
+    const lines = document.getElementById('s_assistantReplies').value.split('\n').map(l=>l.trim()).filter(Boolean);
+    const assistantReplies = {};
+    lines.forEach(l => { const idx = l.indexOf('|'); if (idx > -1) assistantReplies[l.slice(0,idx).trim()] = l.slice(idx+1).trim(); });
+
+    const payload = {
+      deployerMonthlyPriceUSD: Number(document.getElementById('s_deployerPrice').value),
+      botDeploymentPriceUSD: Number(document.getElementById('s_botPrice').value),
+      coinsRequiredPerDeploy: Number(document.getElementById('s_coinsRequired').value),
+      coinsPerReferral: Number(document.getElementById('s_coinsReferral').value),
+      earlyRenewalDiscount: Number(document.getElementById('s_discount').value),
+      earlyRenewalWindowDays: Number(document.getElementById('s_window').value),
+      platformLinks: {
+        whatsappCommunity: document.getElementById('s_waCommunity').value,
+        whatsappChannel: document.getElementById('s_waChannel').value,
+        telegramChannel: document.getElementById('s_tgChannel').value,
+        whatsappSupportNumber: document.getElementById('s_waSupport').value
+      },
+      assistantReplies
+    };
+    try { await apiFetch('/api/admin/settings', { method:'PUT', body: JSON.stringify(payload) }); showToast('Settings saved'); }
+    catch(err) { showToast(err.message, 'error'); }
+  }
+
+  // ---------- BOOT ----------
+  async function boot() {
+    if (!getToken()) return;
+    try {
+      await apiFetch('/api/admin/dashboard'); // validates token
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').classList.add('show');
+      switchView('dashboard');
+    } catch(err) {
+      clearToken();
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('app').classList.remove('show');
+    }
+  }
+
+  window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenFromUrl = urlParams.get('token');
+    if (tokenFromUrl) { setToken(tokenFromUrl); window.history.replaceState({}, document.title, window.location.pathname); }
+    boot();
+  });
+</script>
+</body>
+</html>
