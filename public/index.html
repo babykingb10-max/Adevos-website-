@@ -7,6 +7,19 @@
   <meta name="keywords" content="Adevos-X, Web Development, WhatsApp Bots, AI, Cyber Security">
   <meta name="author" content="Adevos-X Team">
   <title>Adevos-X Tech | Green Cyber Hub</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
+  <!-- PWA: Add to Home Screen support -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0f0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Adevos-X">
   
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -190,6 +203,21 @@
     .touch-content h3 { font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--text-primary); }
     .touch-content p { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.3; }
     .touch-card.highlight-dev-border { border-color: var(--accent) !important; box-shadow: 0 0 15px rgba(0, 230, 118, 0.4); }
+    /* Layout variants driven by the admin-selected `layout` field (top/bottom/left/right) */
+    .touch-card.layout-bottom { display: flex; flex-direction: column-reverse; }
+    .touch-card.layout-left { display: flex; flex-direction: row; align-items: stretch; }
+    .touch-card.layout-left .touch-img { width: 42%; height: auto; min-height: 100%; border-bottom: none; border-right: 1px solid var(--border); }
+    .touch-card.layout-left .touch-content { flex: 1; }
+    .touch-card.layout-right { display: flex; flex-direction: row-reverse; align-items: stretch; }
+    .touch-card.layout-right .touch-img { width: 42%; height: auto; min-height: 100%; border-bottom: none; border-left: 1px solid var(--border); }
+    .touch-card.layout-right .touch-content { flex: 1; }
+    @media (max-width: 560px) {
+      .touch-card.layout-left, .touch-card.layout-right { flex-direction: column; }
+      .touch-card.layout-left .touch-img, .touch-card.layout-right .touch-img { width: 100%; height: 140px; border-right: none; border-left: none; border-bottom: 1px solid var(--border); }
+    }
+    .slide-overlay.layout-top { justify-content: flex-start; }
+    .slide-overlay.layout-left { align-items: flex-start; text-align: left; }
+    .slide-overlay.layout-right { align-items: flex-end; text-align: right; }
     .send-now-trigger-btn, .dev-contact-whatsapp-btn, .support-join-trigger-btn, .generic-touch-card-btn { display: inline-block; background: var(--accent); color: #0a0f0a; padding: 0.4rem 1.2rem; border-radius: 1.5rem; font-weight: bold; font-size: 0.72rem; border: none; cursor: pointer; margin-top: 0.6rem; text-transform: uppercase; transition: 0.2s; text-decoration: none; }
     .send-now-trigger-btn:hover, .dev-contact-whatsapp-btn:hover, .support-join-trigger-btn:hover, .generic-touch-card-btn:hover { background: #fff; color: #0a0f0a; }
     .support-dropdown-links-container { display: none; margin-top: 0.6rem; padding: 0.5rem; border-top: 1px dashed var(--border); background: rgba(0,0,0,0.15); border-radius: 0.4rem; text-align: left; flex-direction: column; gap: 0.4rem; }
@@ -577,6 +605,14 @@
               <div class="option-item-compact" data-theme="light">Light</div>
             </div>
           </div>
+          <div class="setting-item">
+            <label>LANGUAGE</label>
+            <div class="options-list-compact" id="langOptionsCompact">
+              <div class="option-item-compact" data-lang="en">EN</div>
+              <div class="option-item-compact" data-lang="sw">SW</div>
+              <div class="option-item-compact" data-lang="fr">FR</div>
+            </div>
+          </div>
         </div>
         <div class="popup-logout" id="logoutBtnPopup"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></div>
         <div class="popup-provider" id="popupProviderInfo"></div>
@@ -664,32 +700,24 @@
     <div class="slider-track" id="sliderTrack"></div>
   </div>
   <div class="services-section">
-    <div class="section-header"><h2>Our Services</h2><p>(What we offer)</p></div>
+    <div class="section-header"><h2 data-i18n="services_title">Our Services</h2><p data-i18n="services_subtitle">(What we offer)</p></div>
     <div class="services-grid" id="servicesGrid"></div>
   </div>
   <div class="get-in-touch-section" id="feedback-section-anchor">
-    <div class="section-header"><h2>Get in touch</h2></div>
+    <div class="section-header"><h2 data-i18n="get_in_touch_title">Get in touch</h2></div>
     <div class="get-in-touch-grid" id="getInTouchGrid"></div>
   </div>
   <div class="feedback-section">
-    <div class="section-header"><h2>Client feedback</h2></div>
+    <div class="section-header"><h2 data-i18n="client_feedback_title">Client feedback</h2></div>
     <div class="feedback-grid" id="feedbackGrid"></div>
   </div>
   <div class="stay-connected">
-    <h3>Stay Connected</h3>
-    <p>Follow us and subscribe</p>
-    <div class="social-links">
-      <a href="#"><i class="fab fa-twitter"></i></a>
-      <a href="#"><i class="fab fa-whatsapp"></i></a>
-      <a href="#"><i class="fab fa-youtube"></i></a>
-      <a href="#"><i class="fab fa-facebook-f"></i></a>
-      <a href="#"><i class="fab fa-instagram"></i></a>
-      <a href="#"><i class="fab fa-telegram-plane"></i></a>
-      <a href="#"><i class="fab fa-tiktok"></i></a>
-    </div>
+    <h3 data-i18n="stay_connected_title">Stay Connected</h3>
+    <p data-i18n="stay_connected_subtitle">Follow us and subscribe</p>
+    <div class="social-links" id="socialLinksContainer"></div>
     <div class="newsletter">
       <input type="email" id="newsletterEmail" placeholder="Your email">
-      <button id="newsletterBtn">Subscribe</button>
+      <button id="newsletterBtn" data-i18n="btn_subscribe">Subscribe</button>
     </div>
   </div>
 </main>
@@ -731,20 +759,20 @@
       </div>
       <div class="payment-buttons-row">
         <button class="pay-btn" onclick="selectPayment('paystack')"><i class="fas fa-credit-card"></i> Paystack</button>
-        <button class="pay-btn" onclick="selectPayment('manually')"><i class="fas fa-hand-holding-usd"></i> Manually</button>
+        <button class="pay-btn" id="manualPayBtn" onclick="selectPayment('manually')"><i class="fas fa-hand-holding-usd"></i> Manually</button>
         <button class="pay-btn" onclick="selectPayment('coins')"><i class="fas fa-coins"></i> Coins</button>
-        <button class="pay-btn" onclick="window.open('https://wa.me/255XXXXXXXXX?text=I+need+a+free+bot','_blank')"><i class="fas fa-gift"></i> Get Free Bot</button>
+        <button class="pay-btn" id="freeBotBtn" style="display:none;" onclick="openFreeBotLink()"><i class="fas fa-gift"></i> Get Free Bot</button>
       </div>
 
       <!-- Paystack Panel -->
       <div class="payment-panel" id="paystackPanel">
         <div class="payment-panel-box">
           <h4><i class="fas fa-credit-card"></i> Pay with Paystack</h4>
-          <p>Securely pay via Paystack using your card, bank transfer, or mobile money. Amount: <strong style="color:var(--accent);">$5 USD / Month</strong></p>
+          <p>Securely pay via Paystack using your card, bank transfer, or mobile money. Amount: <strong style="color:var(--accent);" id="paystackAmountText">$5 USD</strong></p>
           <p>You will be redirected to Paystack's secure checkout. After payment confirmation, your deployment slot will be unlocked automatically.</p>
-          <button class="paystack-btn-real" onclick="initiatePaystackPayment()"><i class="fas fa-lock"></i> Proceed to Pay — $5.00</button>
+          <button class="paystack-btn-real" onclick="initiatePaystackPayment()"><i class="fas fa-lock"></i> Proceed to Pay — <span id="paystackBtnAmount">$5.00</span></button>
           <div id="paystackConfirmWrap" style="display:none;margin-top:0.7rem;padding-top:0.6rem;border-top:1px dashed var(--border);">
-            <p style="font-size:0.68rem;color:var(--accent);margin-bottom:0.4rem;"><i class="fas fa-check-circle"></i> Completed your Paystack payment? Click below to confirm (Demo).</p>
+            <p style="font-size:0.68rem;color:var(--accent);margin-bottom:0.4rem;"><i class="fas fa-check-circle"></i> Completed your Paystack payment? Click below to confirm.</p>
             <button class="pay-btn" style="width:100%;justify-content:center;" onclick="confirmPaystackPayment()"><i class="fas fa-check"></i> Confirm Payment</button>
           </div>
         </div>
@@ -754,11 +782,9 @@
       <div class="payment-panel" id="manualPanel">
         <div class="payment-panel-box">
           <h4><i class="fas fa-hand-holding-usd"></i> Manual Payment</h4>
-          <p>Send payment to any of the numbers below then screenshot and send proof to our WhatsApp.</p>
-          <div class="manual-number-row"><i class="fab fa-whatsapp" style="color:#25d366;font-size:1rem;"></i><div><span>+255 XXX XXX XXX</span><br><small>Ahmed — M-Pesa / Airtel</small></div></div>
-          <div class="manual-number-row"><i class="fas fa-mobile-alt" style="color:var(--accent);font-size:1rem;"></i><div><span>+255 YYY YYY YYY</span><br><small>Adevos-X Official — Tigo Pesa</small></div></div>
-          <p style="margin-top:0.5rem;">After sending, forward your receipt to <strong style="color:var(--accent);">+255 XXX XXX XXX</strong> on WhatsApp for verification.</p>
-          <button class="pay-btn" style="width:100%;justify-content:center;margin-top:0.5rem;" onclick="confirmManualPayment()"><i class="fas fa-check"></i> I've Sent Payment — Verify (Demo)</button>
+          <p id="manualInstructionsText">Send payment to any of the numbers below then screenshot and send proof to our WhatsApp.</p>
+          <div id="manualNumbersContainer"></div>
+          <button class="pay-btn" style="width:100%;justify-content:center;margin-top:0.5rem;" onclick="confirmManualPayment()"><i class="fas fa-check"></i> I've Sent Payment — Submit for Verification</button>
         </div>
       </div>
 
@@ -766,13 +792,13 @@
       <div class="payment-panel" id="coinsPanel">
         <div class="payment-panel-box">
           <h4><i class="fas fa-coins"></i> Pay with AV Coins</h4>
-          <p>Use your earned Adevos Coins [AV] to deploy your bot. Each deployment costs <strong style="color:var(--accent);">50 AV Coins</strong>.</p>
+          <p>Use your earned Adevos Coins [AV] to deploy your bot. Each deployment costs <strong style="color:var(--accent);" id="coinsRequiredText1">50 AV Coins</strong>.</p>
           <div class="coins-balance-row">
             <div><div style="font-size:0.65rem;color:var(--text-secondary);">Your Balance</div><div class="balance-num" id="deployCoinsBalance">0</div></div>
             <div><i class="fas fa-coins" style="font-size:2rem;color:var(--accent);opacity:0.6;"></i></div>
           </div>
-          <p class="coins-needed">Required: <strong style="color:var(--accent);">50 AV Coins</strong></p>
-          <button class="coins-pay-btn" onclick="payWithCoins()"><i class="fas fa-coins"></i> Pay 50 AV Coins & Deploy</button>
+          <p class="coins-needed">Required: <strong style="color:var(--accent);" id="coinsRequiredText2">50 AV Coins</strong></p>
+          <button class="coins-pay-btn" onclick="payWithCoins()"><i class="fas fa-coins"></i> Pay <span id="coinsRequiredText3">50</span> AV Coins & Deploy</button>
         </div>
       </div>
 
@@ -1080,7 +1106,7 @@
     if (!slidesData.length) { track.innerHTML = ''; return; }
     track.innerHTML = slidesData.map(s => `
       <div class="slide-card" style="background-image:url(${s.image});cursor:pointer;" onclick="handleSlideAction('${s.ctaAction}')">
-        <div class="slide-overlay"><div class="slide-text"><h2>${s.title}</h2><a class="cta-button" onclick="event.stopPropagation();handleSlideAction('${s.ctaAction}')">${s.ctaText} →</a></div></div>
+        <div class="slide-overlay layout-${s.layout || 'bottom'}"><div class="slide-text"><h2>${s.title}</h2><a class="cta-button" onclick="event.stopPropagation();handleSlideAction('${s.ctaAction}')">${s.ctaText} →</a></div></div>
       </div>`).join('');
     updateSliderPosition();
   }
@@ -1112,9 +1138,10 @@
   // ========== RENDERING: GET IN TOUCH (touch cards, DB-driven) ==========
   let updatesData = [];
   function renderGetInTouch(cards) {
+    const layoutClass = (t) => `layout-${t.layout || 'top'}`;
     document.getElementById('getInTouchGrid').innerHTML = cards.map(t => {
       if (t.cardType === 'feedback') return `
-        <div class="touch-card" id="mainFeedbackTargetCard">
+        <div class="touch-card ${layoutClass(t)}" id="mainFeedbackTargetCard">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p>
             <button class="send-now-trigger-btn" id="inlineFormTriggerBtn">Send Now</button>
@@ -1133,7 +1160,7 @@
           </div>
         </div>`;
       if (t.cardType === 'developer') return `
-        <div class="touch-card" id="mainDeveloperCardTarget">
+        <div class="touch-card ${layoutClass(t)}" id="mainDeveloperCardTarget">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content">
             <h3 style="color:var(--accent);font-weight:800;"><i class="fas fa-code"></i> ${t.title}</h3>
@@ -1142,7 +1169,7 @@
           </div>
         </div>`;
       if (t.cardType === 'support') return `
-        <div class="touch-card" id="mainSupportCardTarget">
+        <div class="touch-card ${layoutClass(t)}" id="mainSupportCardTarget">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p>
             <button class="support-join-trigger-btn" id="supportJoinTriggerBtn"><i class="fas fa-users"></i> Join Now</button>
@@ -1154,14 +1181,14 @@
           </div>
         </div>`;
       if (t.cardType === 'tutorial') return `
-        <div class="touch-card" id="mainTutorialCard">
+        <div class="touch-card ${layoutClass(t)}" id="mainTutorialCard">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p>
             <button class="support-join-trigger-btn" onclick="openTutorialsModal()"><i class="fas fa-play-circle"></i> Watch Now</button>
           </div>
         </div>`;
       if (t.cardType === 'updates') return `
-        <div class="touch-card" id="mainUpdatesCardTarget">
+        <div class="touch-card ${layoutClass(t)}" id="mainUpdatesCardTarget">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content">
             <div class="updates-header-row"><h3 style="color:var(--accent);margin-bottom:0;"><i class="fas fa-bell"></i> Updates</h3></div>
@@ -1170,7 +1197,7 @@
           </div>
         </div>`;
       if (t.cardType === 'deploy' || t.cardType === 'deployer' || t.cardType === 'manage') return `
-        <div class="touch-card">
+        <div class="touch-card ${layoutClass(t)}">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p>
             <button class="generic-touch-card-btn" onclick="${
@@ -1179,7 +1206,7 @@
             }">${t.buttonText || 'Open'}</button>
           </div>
         </div>`;
-      return `<div class="touch-card"><img src="${t.image}" class="touch-img" alt="${t.title}"><div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p></div></div>`;
+      return `<div class="touch-card ${layoutClass(t)}"><img src="${t.image}" class="touch-img" alt="${t.title}"><div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p></div></div>`;
     }).join('');
     setupFeedbackInteractionEvents();
     setupSupportDropdownEvents();
@@ -1230,6 +1257,7 @@
       openTutorialsModal: () => openTutorialsModal(),
       openFeedback: () => { const el=document.getElementById('mainFeedbackTargetCard'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); const btn=document.getElementById('inlineFormTriggerBtn'); if(btn) btn.click(); },
       openSupport: () => { const c=document.getElementById('mainSupportCardTarget'); if(c){c.scrollIntoView({behavior:'smooth',block:'center'});const d=document.getElementById('supportDropdownLinksWrap');if(d)d.classList.add('active');} },
+      navigateUpdates: () => navigateToUpdatesCardDirectly(),
       scrollTop: () => window.scrollTo({top:0,behavior:'smooth'})
     };
     if (map[action]) map[action]();
@@ -1238,6 +1266,22 @@
   // ========== BOOTSTRAP: LOAD PUBLIC CONTENT ==========
   async function loadPublicContent() {
     try {
+      // Settings + pricing are fetched first because touch cards (support links) and the
+      // deploy modal (free bot / manual payment / coins) all depend on them.
+      const [settingsRes, pricingRes] = await Promise.all([
+        apiFetch('/api/public/settings'),
+        apiFetch('/api/public/pricing')
+      ]);
+      window.__settings = settingsRes.data;
+      window.__platformLinks = window.__settings.platformLinks || {};
+      window.__pricing = pricingRes;
+
+      applyFreeBotSettings();
+      applyManualPaymentSettings();
+      applyCoinsRequirementText();
+      applyPricingDisplay();
+      renderSocialLinks();
+
       const [slidesRes, servicesRes, cardsRes, testimonialsRes, sidebarRes, updatesRes, botsRes, platformsRes] = await Promise.all([
         apiFetch('/api/public/slides'),
         apiFetch('/api/public/services'),
@@ -1258,6 +1302,7 @@
       renderGetInTouch(cardsRes.data || []);
       renderFeedback(testimonialsRes.data || []);
       renderSidebar(sidebarRes.data || []);
+      await applyTranslations();
 
       setTimeout(observeElements, 200);
       setInterval(nextSlide, 5000);
@@ -1270,6 +1315,116 @@
       showNotif('Could not load site content. Check your connection.', 'error');
     }
   }
+
+  // ========== FREE BOT TOGGLE (Admin-controlled) ==========
+  function applyFreeBotSettings() {
+    const btn = document.getElementById('freeBotBtn');
+    if (!btn) return;
+    const freeBot = window.__settings?.freeBot;
+    if (freeBot && freeBot.enabled && freeBot.whatsappLink) {
+      btn.style.display = 'inline-flex';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+  function openFreeBotLink() {
+    const link = window.__settings?.freeBot?.whatsappLink;
+    if (link) window.open(link, '_blank');
+  }
+
+  // ========== MANUAL PAYMENT (Admin-controlled) ==========
+  function applyManualPaymentSettings() {
+    const manual = window.__settings?.manualPayment;
+    const manualBtn = document.getElementById('manualPayBtn');
+    const instructionsEl = document.getElementById('manualInstructionsText');
+    const numbersEl = document.getElementById('manualNumbersContainer');
+    if (!manual || manual.enabled === false) {
+      if (manualBtn) manualBtn.style.display = 'none';
+      return;
+    }
+    if (manualBtn) manualBtn.style.display = 'inline-flex';
+    if (instructionsEl) instructionsEl.textContent = manual.instructions || '';
+    if (numbersEl) {
+      numbersEl.innerHTML = (manual.numbers || []).map(n => `
+        <div class="manual-number-row"><i class="fab fa-whatsapp" style="color:#25d366;font-size:1rem;"></i><div><span>${n.number}</span><br><small>${n.label}</small></div></div>`).join('') ||
+        '<p style="font-size:0.7rem;color:var(--text-secondary);">No payment numbers configured yet.</p>';
+    }
+  }
+
+  // ========== AV COINS REQUIREMENT TEXT ==========
+  function applyCoinsRequirementText() {
+    const required = window.__settings?.coinsRequiredPerDeploy ?? 50;
+    ['coinsRequiredText1','coinsRequiredText2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = `${required} AV Coins`; });
+    const el3 = document.getElementById('coinsRequiredText3');
+    if (el3) el3.textContent = required;
+  }
+
+  // ========== CURRENCY-AWARE PRICING DISPLAY ==========
+  function applyPricingDisplay() {
+    const pricing = window.__pricing;
+    if (!pricing) return;
+    const { currency, prices } = pricing;
+    const isUSD = currency.code === 'USD';
+
+    const botPriceUSD = window.__settings?.botDeploymentPriceUSD ?? 5;
+    const deployerPriceUSD = window.__settings?.deployerMonthlyPriceUSD ?? 10;
+
+    const paystackAmountText = document.getElementById('paystackAmountText');
+    const paystackBtnAmount = document.getElementById('paystackBtnAmount');
+    const approx = isUSD ? '' : ` (≈ ${currency.symbol}${prices.botDeployment.toLocaleString()})`;
+    if (paystackAmountText) paystackAmountText.textContent = `$${botPriceUSD} USD${approx}`;
+    if (paystackBtnAmount) paystackBtnAmount.textContent = `$${botPriceUSD.toFixed(2)}`;
+  }
+
+  function deployerPriceLabel() {
+    const priceUSD = window.__settings?.deployerMonthlyPriceUSD ?? 10;
+    const pricing = window.__pricing;
+    if (pricing && pricing.currency.code !== 'USD') {
+      return `$${priceUSD} / Month (≈ ${pricing.currency.symbol}${pricing.prices.deployerMonthly.toLocaleString()})`;
+    }
+    return `$${priceUSD} / Month`;
+  }
+
+  // ========== SOCIAL LINKS (Admin-controlled, hidden if empty) ==========
+  function renderSocialLinks() {
+    const container = document.getElementById('socialLinksContainer');
+    if (!container) return;
+    const links = window.__settings?.socialLinks || {};
+    const iconMap = [
+      { key: 'twitter', icon: 'fab fa-twitter' },
+      { key: 'whatsapp', icon: 'fab fa-whatsapp' },
+      { key: 'youtube', icon: 'fab fa-youtube' },
+      { key: 'facebook', icon: 'fab fa-facebook-f' },
+      { key: 'instagram', icon: 'fab fa-instagram' },
+      { key: 'telegram', icon: 'fab fa-telegram-plane' },
+      { key: 'tiktok', icon: 'fab fa-tiktok' }
+    ];
+    const active = iconMap.filter(m => links[m.key]);
+    container.innerHTML = active.length
+      ? active.map(m => `<a href="${links[m.key]}" target="_blank"><i class="${m.icon}"></i></a>`).join('')
+      : `<p style="font-size:0.7rem;color:var(--text-secondary);">Social links coming soon.</p>`;
+  }
+
+  // ========== LIGHTWEIGHT I18N ==========
+  // Elements tagged with data-i18n="key" get their text replaced with the translation for
+  // the selected language (falls back to English, then to whatever text is already there).
+  let currentLang = localStorage.getItem('lang') || 'en';
+  async function applyTranslations() {
+    try {
+      const res = await apiFetch(`/api/public/translations?lang=${currentLang}`);
+      const dict = res.data || {};
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+    } catch (err) { /* translations are optional — page still works without them */ }
+  }
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    applyTranslations();
+  }
+  window.setLanguage = setLanguage;
 
   // ========== INTERSECTION OBSERVER ==========
   const observer = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); }); },{ threshold:0.05 });
@@ -1464,7 +1619,8 @@
     } catch(err) { showNotif(err.message, 'error'); }
   }
   function payWithCoins() {
-    if (!currentUser || currentUser.coins < 50) { showNotif('Insufficient AV Coins! You need 50 coins to deploy.', 'error'); return; }
+    const required = window.__settings?.coinsRequiredPerDeploy ?? 50;
+    if (!currentUser || currentUser.coins < required) { showNotif(`Insufficient AV Coins! You need ${required} coins to deploy.`, 'error'); return; }
     selectedPaymentMethod = 'coins';
     paymentConfirmed = true;
     showNotif('Coins payment selected. Coins will be deducted when you deploy.');
@@ -1749,7 +1905,7 @@
         <div class="deployer-info-card">
           <h4><i class="fas fa-user-shield"></i> What is a Deployer Account?</h4>
           <p>A Deployer Account gives you access to premium bot hosting infrastructure, priority support, and unlimited bot deployments.</p>
-          <div class="deployer-price-tag" id="deployerPriceTag">$10 / Month</div>
+          <div class="deployer-price-tag" id="deployerPriceTag">${deployerPriceLabel()}</div>
           <ul class="deployer-benefits">
             <li><i class="fas fa-check"></i> Deploy unlimited bots</li>
             <li><i class="fas fa-check"></i> Access to all bot templates</li>
@@ -1952,6 +2108,7 @@
   function setTheme(theme){ if(theme==='light') document.body.classList.add('light'); else document.body.classList.remove('light'); localStorage.setItem('theme',theme); }
   let savedTheme = localStorage.getItem('theme'); if(savedTheme) setTheme(savedTheme);
   document.querySelectorAll('#themeOptionsCompact .option-item-compact').forEach(el=>{ el.onclick=()=>{ setTheme(el.getAttribute('data-theme')); document.getElementById('profilePopup').classList.remove('show'); }; });
+  document.querySelectorAll('#langOptionsCompact .option-item-compact').forEach(el=>{ el.onclick=()=>{ setLanguage(el.getAttribute('data-lang')); document.getElementById('profilePopup').classList.remove('show'); }; });
 
   document.getElementById('assistantBtn').onclick=()=>{ const p=document.getElementById('assistantPopup'); const m=document.getElementById('assistantMessages'); if(m.children.length===0) addMsg("Hello, I'm Adevos assistant. How can I help you?",false); p.classList.toggle('show'); };
   document.getElementById('closeAssistant').onclick=()=>document.getElementById('assistantPopup').classList.remove('show');
@@ -1974,6 +2131,11 @@
     await loadPublicContent();
     await loadMusic();
     renderPlatformButtons();
+
+    // Register the PWA service worker (enables "Add to Home Screen" + app-shell caching)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.warn('[PWA] Service worker registration failed:', err));
+    }
   });
 </script>
 </body>
