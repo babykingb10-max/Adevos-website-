@@ -61,6 +61,56 @@ admin/
   index.html               # Admin Panel (login + full CRUD dashboard)
 ```
 
+## What's new: default content, admin toggles, and full skill-doc coverage
+
+This update makes the public site launch with real default content (matching the original
+demo) instead of an empty page, and moves several previously-hardcoded things into
+Admin → Settings so they're fully controllable without touching code:
+
+- **`node seed.js` now seeds everything**: all 4 homepage slides, all 8 "Get in touch" touch
+  cards, the full hamburger sidebar menu (every group from the original demo), starter
+  testimonials, an update-log entry, and 2 sample bots. Every one of these is a normal
+  database record — delete it, edit it, or replace it from the Admin Panel any time.
+- **"Get a Free Bot" button** (Deploy modal) is now driven by `Settings.freeBot` —
+  `enabled` (on/off) and `whatsappLink`. It starts **off** (no link set) until you configure
+  it from Admin → Settings, so the button never points at a broken link. Toggle it on/off
+  freely afterwards.
+- **Manual payment (M-Pesa/Tigo Pesa)** is now driven by `Settings.manualPayment` —
+  `enabled` (on/off), `instructions` text, and a list of `{ label, number }` payment
+  destinations. Starts **on** with placeholder numbers; replace them with your real ones from
+  Admin → Settings. Turning it off immediately hides the "Manually" button on the public site.
+- **"Stay Connected" social icons** are now driven by `Settings.socialLinks`. Every field
+  starts **empty**, and the public site only renders an icon for a platform once you've filled
+  in its link from Admin → Settings — no more dead `#` links.
+- **AV Coins economics** (`coinsRequiredPerDeploy`, `coinsPerReferral`) were already
+  admin-editable; the public site now actually reads and displays these live numbers instead
+  of the hardcoded "50" that was baked into the HTML before.
+- **`layout` field (top/bottom/left/right)** on Slides and Touch Cards is now actually applied
+  on the public site (previously stored in the database but ignored by the frontend) — `left`/
+  `right` renders the touch card as an image-beside-text panel; `top`/`bottom` controls stacking
+  order, exactly as described in the original spec.
+- **Multi-language (i18n)**: a small language switcher (EN/SW/FR) now lives in the profile
+  settings popup next to the theme switcher. A handful of section headers are tagged
+  `data-i18n` and pull live translations from `/api/public/translations`; seeded with English,
+  Swahili, and French out of the box. Add more keys/languages from Admin → Translations, then
+  tag any element you want translated with `data-i18n="your_key"`.
+- **Currency conversion** is now visibly wired in: the Deploy modal's Paystack panel and the
+  Deployer Account price tag show the real price from `Settings` plus a currency-converted
+  approximation (e.g. `$5 USD (≈ TSh 12,500)`) based on the visitor's detected country —
+  previously this data existed in the database but was never shown anywhere.
+- **PWA support**: `public/manifest.json` + `public/sw.js` (a service worker that caches the
+  app shell but always fetches live API data fresh) + generated icons in `public/icons/` are
+  now included and registered, so mobile browsers offer "Add to Home Screen" as described in
+  the original docs.
+- **Favicon**: `favicon.ico`, `favicon-32x32.png`, and `favicon-16x16.png` are included and
+  linked from both the public site and the Admin Panel `<head>`.
+- **Fixed a real bug**: `config/passport.js` used to construct the Google/GitHub OAuth
+  strategies unconditionally, which throws and crashes the *entire server* at boot if those
+  credentials aren't set yet. Both strategies are now registered only when their credentials
+  are present — everything else keeps working normally in the meantime.
+
+
+
 ## Setup
 
 1. **Install dependencies**
@@ -148,6 +198,43 @@ This backend is platform-agnostic and Heroku-ready out of the box:
   a `pending` Transaction. They then send their receipt to your WhatsApp number (configured in
   Admin → Settings → Platform Links). You approve it from Admin Panel → Payments → "Verify and
   Approve", which credits the account automatically.
+
+## How AV Coins works, end to end
+
+1. Every logged-in user can generate a unique referral code (`POST /api/public/referral/generate`
+   — the public site calls this from the AV Coins page). It looks like `REF-AB12CD`.
+2. They share their link: `https://yoursite.com/?ref=REF-AB12CD`.
+3. When someone new opens that link and logs in, the frontend automatically calls
+   `POST /api/public/referral/claim` with that code. The backend credits the **referrer**
+   with `coinsPerReferral` coins (default 2, editable in Admin → Settings) — not the new
+   signup. Each account can only claim one referral code, once, and can't refer itself.
+4. To spend coins: in the Deploy Bot modal, a user picks "Coins" as the payment method. The
+   backend checks `user.coins >= coinsRequiredPerDeploy` (default 50, editable in Admin →
+   Settings) at the moment they hit Deploy, deducts them, and the deployment proceeds — no
+   Paystack or manual payment needed.
+5. Admin can view or manually adjust any user's coin balance from Admin → Users → "Adjust Coins"
+   (useful for support cases, promotions, or correcting a mistake).
+
+## How manual payment works, end to end (on by default)
+
+1. `Settings.manualPayment.enabled` is `true` out of the box (with 2 placeholder numbers from
+   `seed.js`) — go to Admin → Settings and replace them with your real M-Pesa/Tigo Pesa/bank
+   numbers before going live.
+2. On the public site, a customer picks "Manually" in the Deploy modal (or Deployer Account
+   modal), sees your instructions + numbers, sends the money outside the app, then clicks
+   "I've Sent Payment — Submit for Verification". This calls `POST /api/payments/manual` and
+   creates a `Transaction` with `status: 'pending'` — nothing is credited yet.
+3. The customer sends their payment screenshot/receipt to your WhatsApp number (set that number
+   in Admin → Settings → Platform Links, and/or in your manual payment instructions text).
+4. You open Admin Panel → Payments, find the pending transaction, compare it against the
+   receipt they sent you, and click **"Verify and Approve"**. This is the only step that
+   actually credits the account — it adds AV Coins or activates/extends the Deployer
+   subscription automatically, and marks the transaction `completed`.
+5. If a receipt looks fake or the payment never arrived, click **"Reject"** instead — nothing
+   is credited and the transaction is marked `failed`.
+6. To stop accepting manual payments entirely (e.g. if you only want Paystack going forward),
+   flip `Settings.manualPayment.enabled` to **No** in Admin → Settings — the "Manually" button
+   disappears from the public site immediately, without any code changes or redeploy.
 
 ## Notes on bot deployment
 
