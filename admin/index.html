@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Adevos-X Admin Panel</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -267,7 +270,7 @@
         {k:'icon',label:'FontAwesome icon class',type:'text',required:true},
         {k:'group',label:'Group (e.g. Home, Bot Platform, Support)',type:'text',required:true},
         {k:'actionType',label:'Action Type',type:'select',options:['internal','external']},
-        {k:'action',label:'Internal action key (e.g. openDeployModal)',type:'text'},
+        {k:'action',label:'Internal action (only used when Action Type = internal)',type:'select',options:['openDeployModal','openManageBotModal','openCoinsPage','openUserAccountPage','openDeployerAccountModal','openTutorialsModal','openFeedback','openSupport','navigateUpdates','scrollTop']},
         {k:'url',label:'External URL',type:'text'},
         {k:'order',label:'Order',type:'number'},
         {k:'isActive',label:'Active',type:'checkbox'}
@@ -670,6 +673,36 @@
           </div>
         </div>
         <div class="panel">
+          <h3><i class="fas fa-gift"></i> "Get a Free Bot" Button (Deploy Modal)</h3>
+          <div class="form-grid">
+            <div class="field"><label>Enabled</label><select id="s_freeBotEnabled"><option value="true" ${s.freeBot?.enabled?'selected':''}>Yes — show the button</option><option value="false" ${!s.freeBot?.enabled?'selected':''}>No — hide it</option></select></div>
+            <div class="field"><label>WhatsApp / URL link</label><input type="text" id="s_freeBotLink" placeholder="https://wa.me/255XXXXXXXXX?text=I+need+a+free+bot" value="${s.freeBot?.whatsappLink||''}"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3><i class="fas fa-hand-holding-usd"></i> Manual Payment (M-Pesa / Tigo Pesa)</h3>
+          <div class="form-grid">
+            <div class="field"><label>Enabled</label><select id="s_manualEnabled"><option value="true" ${s.manualPayment?.enabled?'selected':''}>Yes — customers can pay manually</option><option value="false" ${!s.manualPayment?.enabled?'selected':''}>No — hide this payment method</option></select></div>
+          </div>
+          <div class="field" style="margin-top:0.6rem;"><label>Instructions shown to customer</label><textarea id="s_manualInstructions">${s.manualPayment?.instructions||''}</textarea></div>
+          <div class="field" style="margin-top:0.6rem;"><label>Payment numbers (one per line: <code>Label | Number</code>)</label>
+            <textarea id="s_manualNumbers" style="width:100%;min-height:90px;background:var(--bg-panel);border:1px solid var(--border);border-radius:0.5rem;padding:0.6rem;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${(s.manualPayment?.numbers||[]).map(n=>`${n.label} | ${n.number}`).join('\n')}</textarea>
+          </div>
+        </div>
+        <div class="panel">
+          <h3><i class="fas fa-share-alt"></i> Stay Connected — Social Links</h3>
+          <p style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:0.6rem;">Leave a field empty to hide that icon on the public site.</p>
+          <div class="form-grid">
+            <div class="field"><label>Twitter / X</label><input type="text" id="s_socialTwitter" value="${s.socialLinks?.twitter||''}"></div>
+            <div class="field"><label>WhatsApp</label><input type="text" id="s_socialWhatsapp" value="${s.socialLinks?.whatsapp||''}"></div>
+            <div class="field"><label>YouTube</label><input type="text" id="s_socialYoutube" value="${s.socialLinks?.youtube||''}"></div>
+            <div class="field"><label>Facebook</label><input type="text" id="s_socialFacebook" value="${s.socialLinks?.facebook||''}"></div>
+            <div class="field"><label>Instagram</label><input type="text" id="s_socialInstagram" value="${s.socialLinks?.instagram||''}"></div>
+            <div class="field"><label>Telegram</label><input type="text" id="s_socialTelegram" value="${s.socialLinks?.telegram||''}"></div>
+            <div class="field"><label>TikTok</label><input type="text" id="s_socialTiktok" value="${s.socialLinks?.tiktok||''}"></div>
+          </div>
+        </div>
+        <div class="panel">
           <h3>Assistant Reply Overrides (one per line: <code>keyword | reply text</code>)</h3>
           <textarea id="s_assistantReplies" style="width:100%;min-height:120px;background:var(--bg-panel);border:1px solid var(--border);border-radius:0.5rem;padding:0.6rem;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${Object.entries(s.assistantReplies||{}).map(([k,v])=>`${k} | ${v}`).join('\\n')}</textarea>
         </div>
@@ -680,6 +713,9 @@
     const lines = document.getElementById('s_assistantReplies').value.split('\n').map(l=>l.trim()).filter(Boolean);
     const assistantReplies = {};
     lines.forEach(l => { const idx = l.indexOf('|'); if (idx > -1) assistantReplies[l.slice(0,idx).trim()] = l.slice(idx+1).trim(); });
+
+    const numberLines = document.getElementById('s_manualNumbers').value.split('\n').map(l=>l.trim()).filter(Boolean);
+    const manualNumbers = numberLines.map(l => { const [label, number] = l.split('|').map(s=>s.trim()); return { label, number }; });
 
     const payload = {
       deployerMonthlyPriceUSD: Number(document.getElementById('s_deployerPrice').value),
@@ -693,6 +729,24 @@
         whatsappChannel: document.getElementById('s_waChannel').value,
         telegramChannel: document.getElementById('s_tgChannel').value,
         whatsappSupportNumber: document.getElementById('s_waSupport').value
+      },
+      freeBot: {
+        enabled: document.getElementById('s_freeBotEnabled').value === 'true',
+        whatsappLink: document.getElementById('s_freeBotLink').value
+      },
+      manualPayment: {
+        enabled: document.getElementById('s_manualEnabled').value === 'true',
+        instructions: document.getElementById('s_manualInstructions').value,
+        numbers: manualNumbers
+      },
+      socialLinks: {
+        twitter: document.getElementById('s_socialTwitter').value,
+        whatsapp: document.getElementById('s_socialWhatsapp').value,
+        youtube: document.getElementById('s_socialYoutube').value,
+        facebook: document.getElementById('s_socialFacebook').value,
+        instagram: document.getElementById('s_socialInstagram').value,
+        telegram: document.getElementById('s_socialTelegram').value,
+        tiktok: document.getElementById('s_socialTiktok').value
       },
       assistantReplies
     };
