@@ -17,6 +17,24 @@ const User = require('../models/User');
 const userAuth = require('../middleware/userAuth');
 const { getAssistantReply } = require('../services/assistantService');
 
+// ---------- PUBLIC-SAFE SETTINGS (free bot toggle, social links, manual payment info) ----------
+router.get('/settings', async (req, res) => {
+  const settings = (await Settings.findOne({ singleton: 'main' })) || {};
+  res.json({
+    success: true,
+    data: {
+      freeBot: settings.freeBot || { enabled: false, whatsappLink: '' },
+      manualPayment: settings.manualPayment || { enabled: false, instructions: '', numbers: [] },
+      socialLinks: settings.socialLinks || {},
+      platformLinks: settings.platformLinks || {},
+      coinsRequiredPerDeploy: settings.coinsRequiredPerDeploy ?? 50,
+      coinsPerReferral: settings.coinsPerReferral ?? 2,
+      deployerMonthlyPriceUSD: settings.deployerMonthlyPriceUSD ?? 10,
+      botDeploymentPriceUSD: settings.botDeploymentPriceUSD ?? 5
+    }
+  });
+});
+
 // ---------- CONTENT ----------
 router.get('/slides', async (req, res) => {
   const slides = await Slide.find({ isActive: true }).sort({ order: 1 });
