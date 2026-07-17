@@ -14,6 +14,11 @@ router.post('/manual', userAuth, async (req, res) => {
     if (!purpose) return res.status(400).json({ success: false, message: 'purpose is required' });
 
     const settings = (await Settings.findOne({ singleton: 'main' })) || {};
+
+    if (settings.manualPayment && settings.manualPayment.enabled === false) {
+      return res.status(403).json({ success: false, message: 'Manual payment is currently disabled. Please use Paystack or AV Coins.' });
+    }
+
     const amountMap = {
       bot_deploy: settings.botDeploymentPriceUSD ?? 5,
       deployer_subscription: settings.deployerMonthlyPriceUSD ?? 10,
