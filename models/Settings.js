@@ -58,7 +58,8 @@ const SettingsSchema = new mongoose.Schema(
       whatsappCommunity: { type: String, default: '' },
       whatsappChannel: { type: String, default: '' },
       telegramChannel: { type: String, default: '' },
-      whatsappSupportNumber: { type: String, default: '' }
+      whatsappSupportNumber: { type: String, default: '' },
+      developerContactLink: { type: String, default: '' }
     }
   },
   { timestamps: true }
