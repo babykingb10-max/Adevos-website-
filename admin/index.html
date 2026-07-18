@@ -138,6 +138,7 @@
 
     <div class="nav-section-label">Bot Platform</div>
     <div class="nav-link" data-view="bots"><i class="fas fa-robot"></i> Bot Catalog</div>
+    <div class="nav-link" data-view="tutorials"><i class="fas fa-graduation-cap"></i> Tutorials</div>
     <div class="nav-link" data-view="platforms"><i class="fas fa-server"></i> Deploy Platforms</div>
     <div class="nav-link" data-view="deployments"><i class="fas fa-rocket"></i> Deployments</div>
     <div class="nav-link" data-view="music"><i class="fas fa-music"></i> Music Player</div>
@@ -207,7 +208,7 @@
   // Each entry describes: API path, table columns, and form fields for create/edit.
   const VIEWS = {
     slides: {
-      title: 'Slides', api: '/api/admin/slides',
+      title: 'Slides', api: '/api/admin/slides', defaultsType: 'slides',
       columns: [ {k:'image',label:'Image',img:true}, {k:'title',label:'Title'}, {k:'layout',label:'Layout'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
       fields: [
         {k:'title',label:'Title',type:'text',required:true},
@@ -221,7 +222,7 @@
       imageUpload: true
     },
     services: {
-      title: 'Services', api: '/api/admin/services',
+      title: 'Services', api: '/api/admin/services', defaultsType: 'services',
       columns: [ {k:'icon',label:'Icon'}, {k:'title',label:'Title'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
       fields: [
         {k:'icon',label:'FontAwesome icon class (e.g. fas fa-code)',type:'text',required:true},
@@ -232,7 +233,7 @@
       ]
     },
     'touch-cards': {
-      title: 'Touch Cards ("Get in touch" section)', api: '/api/admin/touch-cards',
+      title: 'Touch Cards ("Get in touch" section)', api: '/api/admin/touch-cards', defaultsType: 'touch-cards',
       columns: [ {k:'image',label:'Image',img:true}, {k:'title',label:'Title'}, {k:'cardType',label:'Type'}, {k:'layout',label:'Layout'}, {k:'isActive',label:'Active',bool:true} ],
       fields: [
         {k:'title',label:'Title',type:'text',required:true},
@@ -248,7 +249,7 @@
       imageUpload: true
     },
     testimonials: {
-      title: 'Client Testimonials', api: '/api/admin/testimonials',
+      title: 'Client Testimonials', api: '/api/admin/testimonials', defaultsType: 'testimonials',
       columns: [ {k:'text',label:'Text'}, {k:'author',label:'Author'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
       fields: [
         {k:'text',label:'Testimonial Text',type:'textarea',required:true},
@@ -258,12 +259,12 @@
       ]
     },
     updates: {
-      title: 'System Updates Feed', api: '/api/admin/updates',
+      title: 'System Updates Feed', api: '/api/admin/updates', defaultsType: 'updates',
       columns: [ {k:'text',label:'Text'}, {k:'createdAt',label:'Posted',date:true}, {k:'isActive',label:'Active',bool:true} ],
       fields: [ {k:'text',label:'Update Text',type:'textarea',required:true}, {k:'isActive',label:'Active',type:'checkbox'} ]
     },
     'sidebar-items': {
-      title: 'Sidebar (Hamburger) Menu', api: '/api/admin/sidebar',
+      title: 'Sidebar (Hamburger) Menu', api: '/api/admin/sidebar', defaultsType: 'sidebar',
       columns: [ {k:'icon',label:'Icon'}, {k:'label',label:'Label'}, {k:'group',label:'Group'}, {k:'actionType',label:'Type'}, {k:'order',label:'Order'} ],
       fields: [
         {k:'label',label:'Label',type:'text',required:true},
@@ -277,7 +278,7 @@
       ]
     },
     bots: {
-      title: 'Bot Catalog (Deployer Bots)', api: '/api/admin/bots',
+      title: 'Bot Catalog (Deployer Bots)', api: '/api/admin/bots', defaultsType: 'bots',
       columns: [ {k:'image',label:'Image',img:true}, {k:'name',label:'Name'}, {k:'author',label:'Author'}, {k:'addedDate',label:'Added',date:true}, {k:'isActive',label:'Active',bool:true} ],
       fields: [
         {k:'name',label:'Bot Name (shown bold)',type:'text',required:true},
@@ -298,6 +299,18 @@
         {k:'slug',label:'Slug (e.g. heroku)',type:'text',required:true},
         {k:'envKey',label:'.env variable name (e.g. HEROKU_API_KEY)',type:'text',required:true},
         {k:'moduleName',label:'Deploy module (deployHeroku or deployPanel)',type:'select',options:['deployHeroku','deployPanel']},
+        {k:'isActive',label:'Active',type:'checkbox'}
+      ]
+    },
+    tutorials: {
+      title: 'Video Tutorials', api: '/api/admin/tutorials', defaultsType: 'tutorials',
+      columns: [ {k:'icon',label:'Icon'}, {k:'title',label:'Title'}, {k:'videoUrl',label:'Video URL'}, {k:'order',label:'Order'}, {k:'isActive',label:'Active',bool:true} ],
+      fields: [
+        {k:'title',label:'Title (e.g. How to deploy WhatsApp Bot)',type:'text',required:true},
+        {k:'description',label:'Description',type:'textarea'},
+        {k:'icon',label:'FontAwesome icon class (e.g. fab fa-whatsapp)',type:'text'},
+        {k:'videoUrl',label:'Video URL (MP4 file link, or YouTube/Vimeo embed link)',type:'text'},
+        {k:'order',label:'Order',type:'number'},
         {k:'isActive',label:'Active',type:'checkbox'}
       ]
     },
@@ -347,6 +360,18 @@
           <div class="stat-card"><div class="num">${d.activeDeployments}</div><div class="label">Active Deployments</div></div>
           <div class="stat-card"><div class="num">${d.pendingPayments}</div><div class="label">Pending Payments</div></div>
         </div>
+        <div class="panel" style="border-color:var(--accent);">
+          <h3><i class="fas fa-magic"></i> Starter Content</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.7;margin-bottom:0.8rem;">
+            The public site always shows demo starter content automatically for any section you haven't
+            customized yet — it is never blank, even before you touch this panel. Click below once to turn
+            that starter content into real, editable database records for every section at once (slides,
+            services, touch cards, testimonials, sidebar menu, bots, tutorials, updates, settings).
+            This only fills in sections that are currently empty — it will never overwrite anything you've
+            already customized.
+          </p>
+          <button class="btn" onclick="loadAllDefaults()"><i class="fas fa-magic"></i> Load ALL Default Content</button>
+        </div>
         <div class="panel">
           <h3><i class="fas fa-info-circle"></i> Quick Guide</h3>
           <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.7;">
@@ -355,6 +380,13 @@
             Settings controls pricing, discounts, and assistant replies.
           </p>
         </div>`;
+    } catch(err) { showToast(err.message, 'error'); }
+  }
+  async function loadAllDefaults() {
+    try {
+      const res = await apiFetch('/api/admin/defaults/load/all', { method: 'POST' });
+      showToast(res.message);
+      renderDashboard();
     } catch(err) { showToast(err.message, 'error'); }
   }
 
@@ -374,7 +406,13 @@
   function renderCrudTable(view, items) {
     const cfg = VIEWS[view];
     const wrap = document.getElementById('crudTableWrap');
-    if (!items.length) { wrap.innerHTML = `<div class="empty-state"><i class="fas fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:0.5rem;"></i>No records yet. Click "Add New" to create one.</div>`; return; }
+    if (!items.length) {
+      const defaultsBtn = cfg.defaultsType
+        ? `<button class="btn" style="margin-top:0.8rem;" onclick="loadDefaultsFor('${view}')"><i class="fas fa-magic"></i> Load Default Content</button>`
+        : '';
+      wrap.innerHTML = `<div class="empty-state"><i class="fas fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:0.5rem;"></i>No records yet. Click "Add New" to create one${cfg.defaultsType ? ', or load the built-in starter content below' : ''}.<br>${defaultsBtn}</div>`;
+      return;
+    }
     wrap.innerHTML = `<table><thead><tr>${cfg.columns.map(c=>`<th>${c.label}</th>`).join('')}<th>Actions</th></tr></thead><tbody>
       ${items.map(item => `<tr>${cfg.columns.map(c => `<td>${renderCell(item, c)}</td>`).join('')}
         <td class="row-actions">
@@ -383,6 +421,14 @@
         </td></tr>`).join('')}
       </tbody></table>`;
     window[`__data_${view}`] = items;
+  }
+  async function loadDefaultsFor(view) {
+    const cfg = VIEWS[view];
+    try {
+      const res = await apiFetch(`/api/admin/defaults/load/${cfg.defaultsType}`, { method: 'POST' });
+      showToast(res.message);
+      renderCrudView(view);
+    } catch(err) { showToast(err.message, 'error'); }
   }
   function renderCell(item, col) {
     const val = item[col.k];
@@ -652,6 +698,15 @@
       const res = await apiFetch('/api/admin/settings');
       const s = res.data;
       content.innerHTML = `
+        <div class="panel" style="border-color:var(--accent);">
+          <h3><i class="fas fa-magic"></i> Starter Content</h3>
+          <p style="font-size:0.78rem;color:var(--text-secondary);line-height:1.6;margin-bottom:0.6rem;">
+            Turn the built-in demo content (slides, services, touch cards, testimonials, sidebar menu, bots,
+            tutorials, updates) into real editable records in one click. Only fills sections that are
+            currently empty — never overwrites your own edits.
+          </p>
+          <button class="btn" onclick="loadAllDefaults()"><i class="fas fa-magic"></i> Load ALL Default Content</button>
+        </div>
         <div class="panel">
           <h3>Pricing & Discounts</h3>
           <div class="form-grid">
@@ -670,6 +725,7 @@
             <div class="field"><label>WhatsApp Channel</label><input type="text" id="s_waChannel" value="${s.platformLinks?.whatsappChannel||''}"></div>
             <div class="field"><label>Telegram Channel</label><input type="text" id="s_tgChannel" value="${s.platformLinks?.telegramChannel||''}"></div>
             <div class="field"><label>WhatsApp Support Number</label><input type="text" id="s_waSupport" value="${s.platformLinks?.whatsappSupportNumber||''}"></div>
+            <div class="field"><label>Developer Contact Link (WhatsApp, used by "Meet a Developer" card)</label><input type="text" id="s_devContact" value="${s.platformLinks?.developerContactLink||''}"></div>
           </div>
         </div>
         <div class="panel">
@@ -728,7 +784,8 @@
         whatsappCommunity: document.getElementById('s_waCommunity').value,
         whatsappChannel: document.getElementById('s_waChannel').value,
         telegramChannel: document.getElementById('s_tgChannel').value,
-        whatsappSupportNumber: document.getElementById('s_waSupport').value
+        whatsappSupportNumber: document.getElementById('s_waSupport').value,
+        developerContactLink: document.getElementById('s_devContact').value
       },
       freeBot: {
         enabled: document.getElementById('s_freeBotEnabled').value === 'true',
