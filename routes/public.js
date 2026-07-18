@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const defaults = require('../defaults');
 
 const Slide = require('../models/Slide');
 const Service = require('../models/Service');
@@ -8,6 +9,7 @@ const Update = require('../models/Update');
 const Testimonial = require('../models/Testimonial');
 const SidebarItem = require('../models/SidebarItem');
 const Bot = require('../models/Bot');
+const Tutorial = require('../models/Tutorial');
 const DeploymentPlatform = require('../models/DeploymentPlatform');
 const Music = require('../models/Music');
 const Translation = require('../models/Translation');
@@ -20,17 +22,18 @@ const { getAssistantReply } = require('../services/assistantService');
 // ---------- PUBLIC-SAFE SETTINGS (free bot toggle, social links, manual payment info) ----------
 router.get('/settings', async (req, res) => {
   const settings = (await Settings.findOne({ singleton: 'main' })) || {};
+  const d = defaults.settings;
   res.json({
     success: true,
     data: {
-      freeBot: settings.freeBot || { enabled: false, whatsappLink: '' },
-      manualPayment: settings.manualPayment || { enabled: false, instructions: '', numbers: [] },
-      socialLinks: settings.socialLinks || {},
-      platformLinks: settings.platformLinks || {},
-      coinsRequiredPerDeploy: settings.coinsRequiredPerDeploy ?? 50,
-      coinsPerReferral: settings.coinsPerReferral ?? 2,
-      deployerMonthlyPriceUSD: settings.deployerMonthlyPriceUSD ?? 10,
-      botDeploymentPriceUSD: settings.botDeploymentPriceUSD ?? 5
+      freeBot: settings.freeBot || d.freeBot,
+      manualPayment: settings.manualPayment || d.manualPayment,
+      socialLinks: settings.socialLinks || d.socialLinks,
+      platformLinks: settings.platformLinks || d.platformLinks,
+      coinsRequiredPerDeploy: settings.coinsRequiredPerDeploy ?? d.coinsRequiredPerDeploy,
+      coinsPerReferral: settings.coinsPerReferral ?? d.coinsPerReferral,
+      deployerMonthlyPriceUSD: settings.deployerMonthlyPriceUSD ?? d.deployerMonthlyPriceUSD,
+      botDeploymentPriceUSD: settings.botDeploymentPriceUSD ?? d.botDeploymentPriceUSD
     }
   });
 });
@@ -38,44 +41,55 @@ router.get('/settings', async (req, res) => {
 // ---------- CONTENT ----------
 router.get('/slides', async (req, res) => {
   const slides = await Slide.find({ isActive: true }).sort({ order: 1 });
-  res.json({ success: true, data: slides });
+  res.json({ success: true, data: slides.length ? slides : defaults.slides });
 });
 
 router.get('/services', async (req, res) => {
   const services = await Service.find({ isActive: true }).sort({ order: 1 });
-  res.json({ success: true, data: services });
+  res.json({ success: true, data: services.length ? services : defaults.services });
 });
 
 router.get('/touch-cards', async (req, res) => {
   const cards = await TouchCard.find({ isActive: true }).sort({ order: 1 });
-  res.json({ success: true, data: cards });
+  res.json({ success: true, data: cards.length ? cards : defaults.touchCards });
 });
 
 router.get('/updates', async (req, res) => {
   const updates = await Update.find({ isActive: true }).sort({ createdAt: -1 }).limit(20);
-  res.json({ success: true, data: updates });
+  res.json({ success: true, data: updates.length ? updates : defaults.updates });
 });
 
 router.get('/testimonials', async (req, res) => {
   const testimonials = await Testimonial.find({ isActive: true }).sort({ order: 1 });
-  res.json({ success: true, data: testimonials });
+  res.json({ success: true, data: testimonials.length ? testimonials : defaults.testimonials });
 });
 
 router.get('/sidebar', async (req, res) => {
   const items = await SidebarItem.find({ isActive: true }).sort({ order: 1 });
-  res.json({ success: true, data: items });
+  res.json({ success: true, data: items.length ? items : defaults.sidebarItems });
 });
 
 // ---------- BOTS ----------
 router.get('/bots', async (req, res) => {
   const bots = await Bot.find({ isActive: true }).sort({ addedDate: -1 });
-  res.json({ success: true, data: bots });
+  res.json({ success: true, data: bots.length ? bots : defaults.bots });
 });
 
 router.get('/bot/:id', async (req, res) => {
+  if (String(req.params.id).startsWith('default-')) {
+    const bot = defaults.bots.find((b) => b._id === req.params.id);
+    if (!bot) return res.status(404).json({ success: false, message: 'Bot not found' });
+    return res.json({ success: true, data: bot });
+  }
   const bot = await Bot.findById(req.params.id);
   if (!bot) return res.status(404).json({ success: false, message: 'Bot not found' });
   res.json({ success: true, data: bot });
+});
+
+// ---------- TUTORIALS ----------
+router.get('/tutorials', async (req, res) => {
+  const tutorials = await Tutorial.find({ isActive: true }).sort({ order: 1 });
+  res.json({ success: true, data: tutorials.length ? tutorials : defaults.tutorials });
 });
 
 // ---------- PLATFORMS ----------
@@ -95,9 +109,15 @@ router.get('/translations', async (req, res) => {
   const lang = req.query.lang || 'en';
   const translations = await Translation.find();
   const result = {};
-  translations.forEach((t) => {
-    result[t.key] = t.values.get(lang) || t.values.get('en') || '';
-  });
+  if (translations.length) {
+    translations.forEach((t) => {
+      result[t.key] = t.values.get(lang) || t.values.get('en') || '';
+    });
+  } else {
+    defaults.translations.forEach((t) => {
+      result[t.key] = t.values[lang] || t.values.en || '';
+    });
+  }
   res.json({ success: true, lang, data: result });
 });
 
@@ -112,8 +132,8 @@ router.get('/pricing', async (req, res) => {
   }
 
   const basePrices = {
-    deployerMonthly: settings.deployerMonthlyPriceUSD ?? 10,
-    botDeployment: settings.botDeploymentPriceUSD ?? 5
+    deployerMonthly: settings.deployerMonthlyPriceUSD ?? defaults.settings.deployerMonthlyPriceUSD,
+    botDeployment: settings.botDeploymentPriceUSD ?? defaults.settings.botDeploymentPriceUSD
   };
 
   if (!currency) {
@@ -173,7 +193,7 @@ router.post('/referral/claim', userAuth, async (req, res) => {
   }
 
   const settings = (await Settings.findOne({ singleton: 'main' })) || {};
-  const coinsPerReferral = settings.coinsPerReferral ?? 2;
+  const coinsPerReferral = settings.coinsPerReferral ?? defaults.settings.coinsPerReferral;
 
   referrer.coins += coinsPerReferral;
   await referrer.save();
