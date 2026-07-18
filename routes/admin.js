@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminAuth = require('../middleware/adminAuth');
+const defaults = require('../defaults');
 
 const Slide = require('../models/Slide');
 const Service = require('../models/Service');
@@ -9,6 +10,7 @@ const Update = require('../models/Update');
 const Testimonial = require('../models/Testimonial');
 const SidebarItem = require('../models/SidebarItem');
 const Bot = require('../models/Bot');
+const Tutorial = require('../models/Tutorial');
 const DeploymentPlatform = require('../models/DeploymentPlatform');
 const Deployment = require('../models/Deployment');
 const Music = require('../models/Music');
@@ -66,8 +68,70 @@ mountCrud('/updates', Update, { sortBy: { createdAt: -1 } });
 mountCrud('/testimonials', Testimonial);
 mountCrud('/sidebar', SidebarItem);
 mountCrud('/bots', Bot, { sortBy: { addedDate: -1 } });
+mountCrud('/tutorials', Tutorial);
 mountCrud('/platforms', DeploymentPlatform, { sortBy: { name: 1 } });
 mountCrud('/currencies', Currency, { sortBy: { code: 1 } });
+
+// ---------------------------------------------------------------------------
+// "Load Default Content" — turns the shipped demo content (defaults.js) into
+// real, editable database records for a given collection (or all of them).
+// Only inserts into collections that are currently EMPTY, so it never
+// duplicates or overwrites content the admin has already customized.
+// ---------------------------------------------------------------------------
+const DEFAULT_LOADERS = {
+  slides: { Model: Slide, data: defaults.slides },
+  services: { Model: Service, data: defaults.services },
+  'touch-cards': { Model: TouchCard, data: defaults.touchCards },
+  testimonials: { Model: Testimonial, data: defaults.testimonials },
+  updates: { Model: Update, data: defaults.updates },
+  bots: { Model: Bot, data: defaults.bots },
+  tutorials: { Model: Tutorial, data: defaults.tutorials },
+  sidebar: { Model: SidebarItem, data: defaults.sidebarItems },
+  translations: { Model: Translation, data: defaults.translations }
+};
+
+router.post('/defaults/load/:type', async (req, res) => {
+  const { type } = req.params;
+
+  if (type === 'settings') {
+    const existing = await Settings.findOne({ singleton: 'main' });
+    if (existing) return res.json({ success: true, message: 'Settings already exist — left untouched', loaded: false });
+    await Settings.create({ singleton: 'main', ...defaults.settings });
+    return res.json({ success: true, message: 'Default settings loaded', loaded: true });
+  }
+
+  if (type === 'all') {
+    const results = {};
+    for (const key of Object.keys(DEFAULT_LOADERS)) {
+      const { Model, data } = DEFAULT_LOADERS[key];
+      const count = await Model.countDocuments();
+      if (count === 0) {
+        await Model.insertMany(data.map(defaults.stripDefaultFlags));
+        results[key] = 'loaded';
+      } else {
+        results[key] = 'skipped (already has data)';
+      }
+    }
+    const existingSettings = await Settings.findOne({ singleton: 'main' });
+    if (!existingSettings) {
+      await Settings.create({ singleton: 'main', ...defaults.settings });
+      results.settings = 'loaded';
+    } else {
+      results.settings = 'skipped (already has data)';
+    }
+    return res.json({ success: true, message: 'Default content load complete', results });
+  }
+
+  const loader = DEFAULT_LOADERS[type];
+  if (!loader) return res.status(400).json({ success: false, message: `Unknown default content type: ${type}` });
+
+  const count = await loader.Model.countDocuments();
+  if (count > 0) {
+    return res.json({ success: true, message: 'This collection already has content — nothing was changed', loaded: false });
+  }
+  await loader.Model.insertMany(loader.data.map(defaults.stripDefaultFlags));
+  res.json({ success: true, message: 'Default content loaded — you can now edit it below', loaded: true });
+});
 
 // ---------------------------------------------------------------------------
 // Music (single-document editor rather than list CRUD)
