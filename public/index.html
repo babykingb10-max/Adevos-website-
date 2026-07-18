@@ -631,65 +631,8 @@
     <div class="search-suggestions-dropdown" id="searchSuggestionsDropdown"></div>
   </div>
   <div class="menu-accordion">
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-home"></i><span>Home</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content"><ul class="sub-menu-list"><li><a href="#top" id="menuDashboardLink"><i class="fas fa-th-large"></i> Dashboard</a></li></ul></div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header">
-        <div class="accordion-title-wrapper"><i class="fas fa-bell"></i><span>Updates</span></div>
-        <span class="notif-badge" id="menuNotifBadge">4</span>
-        <i class="fas fa-chevron-down chevron-icon"></i>
-      </div>
-      <div class="accordion-content"><ul class="sub-menu-list"><li><a href="#" id="menuUpdatesLink"><i class="fas fa-newspaper"></i> Latest News</a></li></ul></div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-cloud-upload-alt"></i><span>Bot Deployment</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content">
-        <ul class="sub-menu-list">
-          <li><a href="#" id="menuDeployBotLink"><i class="fas fa-robot"></i> Deploy bot</a></li>
-          <li><a href="#" id="menuManageBotLink"><i class="fas fa-tasks"></i> Manage your bot</a></li>
-          <li><a href="#" id="menuCoinsLink"><i class="fas fa-coins"></i> My Adevos Coins <span style="color:var(--accent); font-weight:700;">[AV]</span></a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-user-circle"></i><span>My Account</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content">
-        <ul class="sub-menu-list">
-          <li><a href="#" id="menuUserAccountLink"><i class="fas fa-user"></i> User Account</a></li>
-          <li><a href="#" id="menuDeployerAccountLink"><i class="fas fa-user-shield"></i> Deployer Account</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-graduation-cap"></i><span>Tutorials</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content">
-        <ul class="sub-menu-list">
-          <li><a href="#" class="tutorial-menu-link" data-vid="whatsapp"><i class="fab fa-whatsapp"></i> How to deploy WhatsApp Bot</a></li>
-          <li><a href="#" class="tutorial-menu-link" data-vid="telegram"><i class="fab fa-telegram-plane"></i> How to get Telegram bot</a></li>
-          <li><a href="#" class="tutorial-menu-link" data-vid="deployer"><i class="fas fa-key"></i> How to create Deployer account</a></li>
-          <li><a href="#" class="tutorial-menu-link" data-vid="freebot"><i class="fas fa-gift"></i> How to get a free bot</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-comment-alt"></i><span>Feedback</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content"><ul class="sub-menu-list"><li><a href="#feedback-section-anchor" id="menuFeedbackLink"><i class="fas fa-paper-plane"></i> Send your feedback</a></li></ul></div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-headset"></i><span>Support</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content">
-        <ul class="sub-menu-list">
-          <li><a href="#" id="menuGetSupportTrigger"><i class="fas fa-users"></i> Community</a></li>
-          <li><a href="#"><i class="fab fa-whatsapp"></i> WhatsApp channel</a></li>
-          <li><a href="#"><i class="fab fa-telegram-plane"></i> Telegram channel</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <div class="accordion-header"><div class="accordion-title-wrapper"><i class="fas fa-code"></i><span>Developer</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
-      <div class="accordion-content"><ul class="sub-menu-list"><li><a href="#feedback-section-anchor" id="menuMeetDeveloperLink"><i class="fas fa-user-astronaut"></i> Meet a Developer</a></li></ul></div>
+    <div style="text-align:center;padding:1.5rem 0;color:var(--text-secondary);font-size:0.75rem;">
+      <i class="fas fa-circle-notch fa-spin" style="margin-right:0.4rem;"></i> Loading menu...
     </div>
   </div>
 </div>
@@ -896,15 +839,13 @@
 <!-- ========== VIDEO PLAYER OVERLAY ========== -->
 <div class="video-player-overlay" id="videoPlayerOverlay">
   <div class="video-title-bar" id="videoTitleBar"></div>
-  <div class="video-container">
-    <div class="video-placeholder">
+  <div class="video-container" id="videoContainer">
+    <div class="video-placeholder" id="videoPlaceholder">
       <i class="fas fa-play-circle" style="font-size:3rem;color:var(--accent);"></i>
       <p id="videoPlaceholderText" style="margin-top:0.8rem;"></p>
     </div>
   </div>
-  <div class="video-controls-row">
-    <button class="vid-ctrl-btn" id="vidPlayBtn" onclick="toggleVideoPlay()"><i class="fas fa-play"></i> Play</button>
-    <button class="vid-ctrl-btn" onclick="replayVideo()"><i class="fas fa-redo"></i> Replay</button>
+  <div class="video-controls-row" id="videoControlsRow">
     <button class="vid-ctrl-btn" onclick="closeVideoPlayer()"><i class="fas fa-times"></i> Close</button>
   </div>
 </div>
@@ -1159,27 +1100,38 @@
             <div class="feedback-status-msg" id="feedbackCoreStatusMsg"></div>
           </div>
         </div>`;
-      if (t.cardType === 'developer') return `
+      if (t.cardType === 'developer') {
+        const devLink = t.buttonAction || window.__platformLinks?.developerContactLink || '';
+        return `
         <div class="touch-card ${layoutClass(t)}" id="mainDeveloperCardTarget">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content">
             <h3 style="color:var(--accent);font-weight:800;"><i class="fas fa-code"></i> ${t.title}</h3>
             <p>${t.description}</p>
-            <a href="${t.buttonAction || '#'}" target="_blank" class="dev-contact-whatsapp-btn"><i class="fab fa-whatsapp"></i> Contact</a>
+            ${devLink
+              ? `<a href="${devLink}" target="_blank" class="dev-contact-whatsapp-btn"><i class="fab fa-whatsapp"></i> Contact</a>`
+              : `<span class="dev-contact-whatsapp-btn" style="opacity:0.6;cursor:default;background:var(--bg-surface);color:var(--text-secondary);"><i class="fas fa-clock"></i> Coming Soon</span>`}
           </div>
         </div>`;
-      if (t.cardType === 'support') return `
+      }
+      if (t.cardType === 'support') {
+        const links = window.__platformLinks || {};
+        const supportLink = (url, icon, label) => url
+          ? `<a href="${url}" target="_blank" class="support-sublink-item"><i class="${icon}"></i> <span>${label}</span></a>`
+          : `<span class="support-sublink-item" style="opacity:0.55;cursor:default;"><i class="fas fa-clock"></i> <span>${label} — Coming Soon</span></span>`;
+        return `
         <div class="touch-card ${layoutClass(t)}" id="mainSupportCardTarget">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
           <div class="touch-content"><h3>${t.title}</h3><p>${t.description}</p>
             <button class="support-join-trigger-btn" id="supportJoinTriggerBtn"><i class="fas fa-users"></i> Join Now</button>
             <div class="support-dropdown-links-container" id="supportDropdownLinksWrap">
-              <a href="${window.__platformLinks?.whatsappCommunity || '#'}" target="_blank" class="support-sublink-item"><i class="fas fa-users-cog"></i> <span>WhatsApp Community</span></a>
-              <a href="${window.__platformLinks?.whatsappChannel || '#'}" target="_blank" class="support-sublink-item"><i class="fab fa-whatsapp"></i> <span>WhatsApp Channel</span></a>
-              <a href="${window.__platformLinks?.telegramChannel || '#'}" target="_blank" class="support-sublink-item"><i class="fab fa-telegram-plane"></i> <span>Telegram Channel</span></a>
+              ${supportLink(links.whatsappCommunity, 'fas fa-users-cog', 'WhatsApp Community')}
+              ${supportLink(links.whatsappChannel, 'fab fa-whatsapp', 'WhatsApp Channel')}
+              ${supportLink(links.telegramChannel, 'fab fa-telegram-plane', 'Telegram Channel')}
             </div>
           </div>
         </div>`;
+      }
       if (t.cardType === 'tutorial') return `
         <div class="touch-card ${layoutClass(t)}" id="mainTutorialCard">
           <img src="${t.image}" class="touch-img" alt="${t.title}">
@@ -1210,7 +1162,6 @@
     }).join('');
     setupFeedbackInteractionEvents();
     setupSupportDropdownEvents();
-    setupMenuUpdatesNavigationEvent();
     renderUpdatesList();
   }
   function renderUpdatesList() {
@@ -1223,11 +1174,13 @@
   function renderSidebar(items) {
     const groups = {};
     items.forEach(it => { (groups[it.group] = groups[it.group] || []).push(it); });
-    const iconFor = { Home:'fas fa-home', Updates:'fas fa-bell', 'Bot Platform':'fas fa-cloud-upload-alt', 'My Account':'fas fa-user-circle', Tutorials:'fas fa-graduation-cap', Feedback:'fas fa-comment-alt', Support:'fas fa-headset', Developer:'fas fa-code' };
+    const iconFor = { Home:'fas fa-home', Updates:'fas fa-bell', 'Bot Deployment':'fas fa-cloud-upload-alt', 'My Account':'fas fa-user-circle', Tutorials:'fas fa-graduation-cap', Feedback:'fas fa-comment-alt', Support:'fas fa-headset', Developer:'fas fa-code' };
     const accordion = document.querySelector('.menu-accordion');
     accordion.innerHTML = Object.entries(groups).map(([group, list]) => `
       <div class="accordion-item">
-        <div class="accordion-header"><div class="accordion-title-wrapper"><i class="${iconFor[group]||'fas fa-circle'}"></i><span>${group}</span></div><i class="fas fa-chevron-down chevron-icon"></i></div>
+        <div class="accordion-header"><div class="accordion-title-wrapper"><i class="${iconFor[group]||'fas fa-circle'}"></i><span>${group}</span></div>${
+          group === 'Updates' && updatesData.length ? `<span class="notif-badge" id="menuNotifBadge">${updatesData.length}</span>` : ''
+        }<i class="fas fa-chevron-down chevron-icon"></i></div>
         <div class="accordion-content"><ul class="sub-menu-list">${list.map(it => `<li><a href="${it.actionType==='external'?it.url:'#'}" data-action="${it.action}" data-external="${it.actionType==='external'}" target="${it.actionType==='external'?'_blank':'_self'}"><i class="${it.icon}"></i> ${it.label}</a></li>`).join('')}</ul></div>
       </div>`).join('');
     accordion.querySelectorAll('.accordion-header').forEach(header=>{
@@ -1282,7 +1235,7 @@
       applyPricingDisplay();
       renderSocialLinks();
 
-      const [slidesRes, servicesRes, cardsRes, testimonialsRes, sidebarRes, updatesRes, botsRes, platformsRes] = await Promise.all([
+      const [slidesRes, servicesRes, cardsRes, testimonialsRes, sidebarRes, updatesRes, botsRes, platformsRes, tutorialsRes] = await Promise.all([
         apiFetch('/api/public/slides'),
         apiFetch('/api/public/services'),
         apiFetch('/api/public/touch-cards'),
@@ -1290,12 +1243,14 @@
         apiFetch('/api/public/sidebar'),
         apiFetch('/api/public/updates'),
         apiFetch('/api/public/bots'),
-        apiFetch('/api/public/platforms')
+        apiFetch('/api/public/platforms'),
+        apiFetch('/api/public/tutorials')
       ]);
       slidesData = slidesRes.data || [];
       updatesData = updatesRes.data || [];
       botsData = botsRes.data || [];
       platformsData = platformsRes.data || [];
+      tutorialsData = tutorialsRes.data || [];
 
       renderSlides();
       renderServices(servicesRes.data || []);
@@ -1466,10 +1421,6 @@
     if(c) c.innerHTML = '';
     showNotif('All updates marked as read!');
   };
-  function setupMenuUpdatesNavigationEvent() {
-    const link = document.getElementById('menuUpdatesLink');
-    if(link){ link.addEventListener('click',(e)=>{ e.preventDefault(); closeSidebarFn(); setTimeout(()=>navigateToUpdatesCardDirectly(),400); }); }
-  }
 
   // ========== SUPPORT DROPDOWN ==========
   function setupSupportDropdownEvents() {
@@ -1526,17 +1477,21 @@
   // ========== BOT CARD BUILDER ==========
   function buildAvailableBotCardHTML(b, isDeployerCtx, opts) {
     opts = opts || {};
-    const deployLabel = opts.deployLabel || 'Deploy';
+    const isComingSoon = !!b.isPlaceholder;
+    const deployLabel = isComingSoon ? 'Coming Soon' : (opts.deployLabel || 'Deploy');
+    const deployAction = isComingSoon ? `showNotif('${b.name.replace(/'/g,"\\'")} is not fully configured yet — check back soon!','error')` : `handleDeployBotClick('${b._id}', ${!!isDeployerCtx})`;
     const authorLine = `<span>By <strong style="color:var(--text-secondary);font-weight:700;">${b.author || 'Adevos-X Team'}</strong></span><span>Added on ${new Date(b.addedDate).toLocaleDateString()}</span>`;
+    const sourceBtn = b.githubRepo ? `<button class="bot-action-btn secondary" onclick="window.open('${b.githubRepo}','_blank')">Source Code</button>` : '';
     return `
-      <div class="bot-card-item-v2">
+      <div class="bot-card-item-v2" style="${isComingSoon ? 'opacity:0.85;' : ''}">
         <img src="${b.image}" class="bot-card-img-v2" alt="${b.name}">
         <div class="bot-card-actions-row">
-          <button class="bot-action-btn" onclick="handleDeployBotClick('${b._id}', ${!!isDeployerCtx})">${deployLabel}</button>
-          <button class="bot-action-btn secondary" onclick="window.open('${b.githubRepo}','_blank')">Source Code</button>
+          <button class="bot-action-btn" style="${isComingSoon ? 'background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border);' : ''}" onclick="${deployAction}">${deployLabel}</button>
+          ${sourceBtn}
         </div>
         <div class="bot-card-body-v2">
           <div class="bot-card-name-v2">${b.name}</div>
+          ${isComingSoon ? `<div style="font-size:0.62rem;color:var(--text-secondary);margin:0.2rem 0 0.4rem;"><i class="fas fa-clock"></i> Not fully set up yet — Admin is finishing configuration.</div>` : ''}
           ${opts.note ? `<div style="font-size:0.62rem;color:var(--accent);margin:0.2rem 0 0.4rem;">${opts.note}</div>` : ''}
           <div class="bot-card-desc-v2">${b.description}</div>
           <div class="bot-card-meta-v2">${authorLine}</div>
@@ -1971,33 +1926,76 @@
     catch(err) { showNotif(err.message, 'error'); }
   }
 
-  // ========== TUTORIALS (static list — no dedicated backend model; content is illustrative) ==========
-  const tutorialsData = [
-    { id: "whatsapp", title: "How to deploy WhatsApp Bot", desc: "Step-by-step guide to get your WhatsApp bot live.", icon: "fab fa-whatsapp" },
-    { id: "telegram", title: "How to get Telegram bot", desc: "Setup and deploy your Telegram bot easily.", icon: "fab fa-telegram-plane" },
-    { id: "deployer", title: "How to create Deployer account", desc: "Unlock premium features with a Deployer account.", icon: "fas fa-key" },
-    { id: "freebot", title: "How to get a free bot", desc: "Learn how to claim your free bot today.", icon: "fas fa-gift" }
-  ];
+  // ========== TUTORIALS (real content managed from Admin -> Tutorials) ==========
+  let tutorialsData = [];
+  async function loadTutorials() {
+    try {
+      const res = await apiFetch('/api/public/tutorials');
+      tutorialsData = res.data || [];
+    } catch (err) { tutorialsData = []; }
+  }
   function renderTutorials() {
-    document.getElementById('tutorialList').innerHTML = tutorialsData.map(t=>`
-      <div class="tutorial-item" onclick="playVideo('${t.id}','${t.title}')">
-        <i class="${t.icon}"></i>
-        <div class="tutorial-item-text"><h4>${t.title}</h4><p>${t.desc}</p></div>
+    const list = document.getElementById('tutorialList');
+    if (!tutorialsData.length) {
+      list.innerHTML = `<div class="empty-state" style="text-align:center;padding:1.5rem;color:var(--text-secondary);font-size:0.8rem;">No tutorials added yet. Check back soon!</div>`;
+      return;
+    }
+    list.innerHTML = tutorialsData.map(t=>`
+      <div class="tutorial-item" onclick="playVideo('${t._id}','${t.title.replace(/'/g,"\\'")}')">
+        <i class="${t.icon || 'fas fa-play-circle'}"></i>
+        <div class="tutorial-item-text"><h4>${t.title}</h4><p>${t.description || ''}</p></div>
         <i class="fas fa-play-circle" style="margin-left:auto;color:var(--accent);"></i>
       </div>`).join('');
   }
-  function openTutorialsModal() { renderTutorials(); openModal('tutorialsModal'); }
+  async function openTutorialsModal() {
+    if (!tutorialsData.length) await loadTutorials();
+    renderTutorials();
+    openModal('tutorialsModal');
+  }
+  function toYouTubeEmbed(url) {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
+    return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+  }
+  function toVimeoEmbed(url) {
+    const m = url.match(/vimeo\.com\/(\d+)/);
+    return m ? `https://player.vimeo.com/video/${m[1]}` : null;
+  }
   function playVideo(id, title) {
     closeModal('tutorialsModal');
+    const tutorial = tutorialsData.find(t => t._id === id);
     document.getElementById('videoTitleBar').textContent = title;
-    document.getElementById('videoPlaceholderText').textContent = title + ' — video coming soon.';
+    const container = document.getElementById('videoContainer');
+    const controlsRow = document.getElementById('videoControlsRow');
+    const url = tutorial?.videoUrl || '';
+    const ytEmbed = url ? toYouTubeEmbed(url) : null;
+    const vimeoEmbed = url ? toVimeoEmbed(url) : null;
+
+    if (ytEmbed || vimeoEmbed) {
+      container.innerHTML = `<iframe src="${ytEmbed || vimeoEmbed}" style="width:100%;aspect-ratio:16/9;border:none;display:block;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      controlsRow.innerHTML = `<button class="vid-ctrl-btn" onclick="closeVideoPlayer()"><i class="fas fa-times"></i> Close</button>`;
+    } else if (url) {
+      container.innerHTML = `<video id="tutorialVideoTag" src="${url}" controls style="width:100%;display:block;background:#000;"></video>`;
+      controlsRow.innerHTML = `<button class="vid-ctrl-btn" onclick="closeVideoPlayer()"><i class="fas fa-times"></i> Close</button>`;
+    } else {
+      container.innerHTML = `
+        <div class="video-placeholder">
+          <i class="fas fa-video-slash" style="font-size:3rem;color:var(--text-secondary);"></i>
+          <p style="margin-top:0.8rem;">No video has been uploaded for this tutorial yet.</p>
+        </div>`;
+      controlsRow.innerHTML = `<button class="vid-ctrl-btn" onclick="closeVideoPlayer()"><i class="fas fa-times"></i> Close</button>`;
+    }
     document.getElementById('videoPlayerOverlay').classList.add('active');
-    document.getElementById('vidPlayBtn').innerHTML = '<i class="fas fa-play"></i> Play';
   }
-  let vidPlaying = false;
-  function toggleVideoPlay() { vidPlaying = !vidPlaying; document.getElementById('vidPlayBtn').innerHTML = vidPlaying ? '<i class="fas fa-pause"></i> Pause' : '<i class="fas fa-play"></i> Play'; }
-  function replayVideo() { vidPlaying = false; document.getElementById('vidPlayBtn').innerHTML = '<i class="fas fa-play"></i> Play'; }
-  function closeVideoPlayer() { document.getElementById('videoPlayerOverlay').classList.remove('active'); vidPlaying = false; }
+  function closeVideoPlayer() {
+    document.getElementById('videoPlayerOverlay').classList.remove('active');
+    const videoTag = document.getElementById('tutorialVideoTag');
+    if (videoTag) videoTag.pause();
+    document.getElementById('videoContainer').innerHTML = `
+      <div class="video-placeholder">
+        <i class="fas fa-play-circle" style="font-size:3rem;color:var(--accent);"></i>
+        <p style="margin-top:0.8rem;"></p>
+      </div>`;
+  }
 
   // ========== MUSIC PLAYER (tracks loaded from backend) ==========
   async function loadMusic() {
