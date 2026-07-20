@@ -16,39 +16,43 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
  */
 function scheduleAutoExpiry() {
   cron.schedule('0 3 * * *', async () => {
-    console.log('[cron] Running auto-expiry check...');
-    const now = new Date();
+    try {
+      console.log('[cron] Running auto-expiry check...');
+      const now = new Date();
 
-    const expiredUsers = await User.find({
-      $or: [
-        { deployerExpiry: { $lte: now, $ne: null } },
-        { subscriptionExpiry: { $lte: now, $ne: null } }
-      ]
-    });
+      const expiredUsers = await User.find({
+        $or: [
+          { deployerExpiry: { $lte: now, $ne: null } },
+          { subscriptionExpiry: { $lte: now, $ne: null } }
+        ]
+      });
 
-    for (const user of expiredUsers) {
-      const activeDeployments = await Deployment.find({ user: user._id, isActive: true }).populate('platform');
+      for (const user of expiredUsers) {
+        const activeDeployments = await Deployment.find({ user: user._id, isActive: true }).populate('platform');
 
-      for (const deployment of activeDeployments) {
-        try {
-          const platform = await DeploymentPlatform.findById(deployment.platform);
-          if (platform) {
-            await dynamicStop(platform.slug, deployment.externalAppId);
+        for (const deployment of activeDeployments) {
+          try {
+            const platform = await DeploymentPlatform.findById(deployment.platform);
+            if (platform) {
+              await dynamicStop(platform.slug, deployment.externalAppId);
+            }
+            deployment.isActive = false;
+            deployment.status = 'suspended';
+            deployment.logs.push({ text: 'Auto-suspended: subscription expired' });
+            await deployment.save();
+          } catch (err) {
+            console.error(`[cron] Failed to stop deployment ${deployment._id}:`, err.message);
           }
-          deployment.isActive = false;
-          deployment.status = 'suspended';
-          deployment.logs.push({ text: 'Auto-suspended: subscription expired' });
-          await deployment.save();
-        } catch (err) {
-          console.error(`[cron] Failed to stop deployment ${deployment._id}:`, err.message);
         }
+
+        if (user.deployerExpiry && user.deployerExpiry <= now) user.isDeployer = false;
+        await user.save();
       }
 
-      if (user.deployerExpiry && user.deployerExpiry <= now) user.isDeployer = false;
-      await user.save();
+      console.log(`[cron] Auto-expiry processed ${expiredUsers.length} user(s).`);
+    } catch (err) {
+      console.error('[cron] Auto-expiry job failed:', err.message);
     }
-
-    console.log(`[cron] Auto-expiry processed ${expiredUsers.length} user(s).`);
   });
 }
 
@@ -58,36 +62,40 @@ function scheduleAutoExpiry() {
  */
 function scheduleEmailReminders() {
   cron.schedule('0 3 * * *', async () => {
-    console.log('[cron] Running expiry reminder check...');
-    const settings = (await Settings.findOne({ singleton: 'main' })) || {};
-    const discountPercent = settings.earlyRenewalDiscount ?? 20;
+    try {
+      console.log('[cron] Running expiry reminder check...');
+      const settings = (await Settings.findOne({ singleton: 'main' })) || {};
+      const discountPercent = settings.earlyRenewalDiscount ?? 20;
 
-    const now = new Date();
-    const usersWithExpiry = await User.find({
-      $or: [{ deployerExpiry: { $ne: null } }, { subscriptionExpiry: { $ne: null } }]
-    });
+      const now = new Date();
+      const usersWithExpiry = await User.find({
+        $or: [{ deployerExpiry: { $ne: null } }, { subscriptionExpiry: { $ne: null } }]
+      });
 
-    for (const user of usersWithExpiry) {
-      const expiry = user.deployerExpiry || user.subscriptionExpiry;
-      if (!expiry) continue;
+      for (const user of usersWithExpiry) {
+        const expiry = user.deployerExpiry || user.subscriptionExpiry;
+        if (!expiry) continue;
 
-      const daysLeft = Math.ceil((expiry - now) / MS_PER_DAY);
+        const daysLeft = Math.ceil((expiry - now) / MS_PER_DAY);
 
-      if ((daysLeft === 7 || daysLeft === 1) && user.lastReminderSentDays !== daysLeft) {
-        try {
-          await sendExpiryReminder({
-            to: user.email,
-            name: user.name,
-            expiryDate: expiry.toDateString(),
-            daysLeft,
-            discountPercent
-          });
-          user.lastReminderSentDays = daysLeft;
-          await user.save();
-        } catch (err) {
-          console.error(`[cron] Failed to send reminder to ${user.email}:`, err.message);
+        if ((daysLeft === 7 || daysLeft === 1) && user.lastReminderSentDays !== daysLeft) {
+          try {
+            await sendExpiryReminder({
+              to: user.email,
+              name: user.name,
+              expiryDate: expiry.toDateString(),
+              daysLeft,
+              discountPercent
+            });
+            user.lastReminderSentDays = daysLeft;
+            await user.save();
+          } catch (err) {
+            console.error(`[cron] Failed to send reminder to ${user.email}:`, err.message);
+          }
         }
       }
+    } catch (err) {
+      console.error('[cron] Email reminder job failed:', err.message);
     }
   });
 }
