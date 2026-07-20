@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const axios = require('axios');
 const router = express.Router();
+const asyncHandler = require('../utils/asyncHandler');
 
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
@@ -113,10 +114,14 @@ router.post('/webhook', express.json({ verify: (req, res, buf) => { req.rawBody 
 });
 
 // ---------- CHECK TRANSACTION STATUS (used by frontend after redirect back) ----------
-router.get('/status/:reference', userAuth, async (req, res) => {
-  const transaction = await Transaction.findOne({ reference: req.params.reference });
-  if (!transaction) return res.status(404).json({ success: false, message: 'Transaction not found' });
-  res.json({ success: true, status: transaction.status });
-});
+router.get(
+  '/status/:reference',
+  userAuth,
+  asyncHandler(async (req, res) => {
+    const transaction = await Transaction.findOne({ reference: req.params.reference });
+    if (!transaction) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    res.json({ success: true, status: transaction.status });
+  })
+);
 
 module.exports = router;
