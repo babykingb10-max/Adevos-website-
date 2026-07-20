@@ -1016,18 +1016,29 @@
     const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
     const token = getToken();
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    const res = await fetch(`${API_BASE}${path}`, Object.assign({}, opts, { headers }));
+    let res;
+    try {
+      res = await fetch(`${API_BASE}${path}`, Object.assign({}, opts, { headers }));
+    } catch (networkErr) {
+      // Network failure (offline, DNS, server unreachable) — not an auth problem.
+      const err = new Error('Could not reach the server. Please check your connection and try again.');
+      err.status = 0;
+      throw err;
+    }
     let data = null;
     try { data = await res.json(); } catch (e) { /* non-JSON response */ }
     if (!res.ok) {
       const message = (data && data.message) || `Request failed (${res.status})`;
-      throw new Error(message);
+      const err = new Error(message);
+      err.status = res.status;
+      throw err;
     }
     return data;
   }
 
   // ========== STATE ==========
   let currentUser = null;
+  let hasEnteredSite = false; // true once login is resolved OR the person clicks "Continue Browsing" — gates update toast popups so they never appear over the login screen
   let botsData = [];
   let platformsData = [];
   let selectedPlatform = '';
@@ -1262,9 +1273,7 @@
       setTimeout(observeElements, 200);
       setInterval(nextSlide, 5000);
 
-      if (updatesData.length) {
-        setTimeout(()=>{ createLiveToastNotification(updatesData[0].text); startToastSystemLoop(); }, 1500);
-      }
+      setTimeout(maybeStartUpdateToasts, 1500);
     } catch (err) {
       console.error('Failed to load public content:', err);
       showNotif('Could not load site content. Check your connection.', 'error');
@@ -1386,7 +1395,15 @@
   function observeElements() { document.querySelectorAll('.service-card,.touch-card,.feedback-card').forEach(el=>observer.observe(el)); }
 
   // ========== TOAST ==========
-  let hasUserReadUpdates = false, toastTimeLimitExceeded = false, logPointer = 0;
+  let hasUserReadUpdates = false, toastTimeLimitExceeded = false, logPointer = 0, toastLoopStarted = false;
+  // Update toast popups must never appear over the login screen — this is the single
+  // gate everything routes through. Safe to call multiple times; only starts once.
+  function maybeStartUpdateToasts() {
+    if (toastLoopStarted || !hasEnteredSite || !updatesData.length) return;
+    toastLoopStarted = true;
+    createLiveToastNotification(updatesData[0].text);
+    startToastSystemLoop();
+  }
   function createLiveToastNotification(message) {
     if(hasUserReadUpdates || toastTimeLimitExceeded) return;
     const container = document.getElementById('toastContainer');
@@ -2048,8 +2065,14 @@
     overlayDiv.innerHTML=`<div class="login-card"><h2>Welcome Back</h2><p>Sign in to continue to Adevos-X Tech</p>
       <a class="sso-btn google" href="${API_BASE}/auth/google"><i class="fab fa-google"></i> Continue with Google</a>
       <a class="sso-btn github" href="${API_BASE}/auth/github"><i class="fab fa-github"></i> Continue with GitHub</a>
-      <button class="sso-btn generic" onclick="document.getElementById('ssoOverlay').remove()"><i class="fas fa-times"></i> Continue Browsing</button></div>`;
+      <button class="sso-btn generic" onclick="dismissLoginOverlay()"><i class="fas fa-times"></i> Continue Browsing</button></div>`;
     document.body.appendChild(overlayDiv);
+  }
+  function dismissLoginOverlay() {
+    const overlay = document.getElementById('ssoOverlay');
+    if (overlay) overlay.remove();
+    hasEnteredSite = true;
+    maybeStartUpdateToasts();
   }
   function updatePopupAvatars(){
     let small=document.getElementById('popupAvatarSmall'); let av=document.getElementById('profileAvatar');
@@ -2059,7 +2082,7 @@
   }
   function getInitials(name){ let parts=(name||'AX').trim().split(/\s+/); if(parts.length===1) return parts[0].substring(0,2).toUpperCase(); return (parts[0][0]+parts[parts.length-1][0]).toUpperCase(); }
 
-  async function initAuth() {
+  async function initAuth(retryCount = 0) {
     const urlParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = urlParams.get('token');
     if (tokenFromUrl) {
@@ -2079,14 +2102,30 @@
       updatePopupAvatars();
       document.getElementById('logoutBtnPopup').onclick = () => { clearToken(); location.reload(); };
       updateCoinsDisplay();
+      hasEnteredSite = true;
+      maybeStartUpdateToasts();
       await refreshMyDeployments();
 
       if (refCode && refCode !== currentUser.referralCode) {
         try { const r = await apiFetch('/api/public/referral/claim', { method:'POST', body: JSON.stringify({ refCode }) }); showNotif(r.message); } catch(e) { /* already claimed or own code — ignore */ }
       }
     } catch (err) {
-      clearToken();
-      showLoginOverlay();
+      // Only a genuine 401 (server explicitly rejected the token) means the
+      // session is actually invalid — clear it and ask the person to log in again.
+      if (err.status === 401) {
+        clearToken();
+        showLoginOverlay();
+        return;
+      }
+      // Anything else (server temporarily down, network hiccup, cold start) is NOT
+      // a reason to log the person out. Keep the token and retry a few times
+      // before giving up, so a brief server blip never forces an unnecessary re-login.
+      if (retryCount < 3) {
+        showNotif('Reconnecting to the server...', 'error');
+        setTimeout(() => initAuth(retryCount + 1), 2000 * (retryCount + 1));
+      } else {
+        showNotif('Server is temporarily unavailable. Please refresh in a moment.', 'error');
+      }
     }
   }
 
